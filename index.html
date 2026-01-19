@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Simulador Médico (Atualizado)</title>
+  <!-- Carregamos a folha de estilos original.  As imagens foram referenciadas via GitHub raw para dispensar arquivo local. -->
+  <!-- Utilizamos a folha de estilos hospedada no repositório original. -->
+  <link rel="stylesheet" href="https://jonatanoficial-bit.github.io/Medical-Simulator-Vale-Editon/style.css" />
+</head>
+<body>
+
+  <!-- TELA DE CAPA -->
+  <section id="cover-screen" class="screen active" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/capa.jpg')">
+    <div class="cover-content">
+      <h1>Simulador Médico</h1>
+      <p>Toque em qualquer lugar para continuar</p>
+      <p class="muted" style="margin-top:10px;">Mobile-first • Versão Web</p>
+    </div>
+  </section>
+
+  <!-- BOAS-VINDAS -->
+  <section id="welcome-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/hospital_corridor.png')">
+    <div class="welcome-content">
+      <div class="welcome-panel">
+        <h2>Bem-vindo ao Plantão</h2>
+        <p>Você está entrando em um pronto‑socorro movimentado. Aqui, cada decisão impacta sinais vitais, tempo de resposta e desfechos.</p>
+        <p>Use exames e medicações com estratégia. Você pode solicitar opções desnecessárias — mas isso pode reduzir sua pontuação.</p>
+        <div class="hint">Toque para continuar…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOBBY (configuração de perfil) -->
+  <section id="lobby-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/bg_hospital_02.jpg')">
+    <div class="lobby-content">
+      <h2>Seu Perfil</h2>
+      <div class="player-setup">
+        <label>Seu nome</label>
+        <input id="player-name" placeholder="Ex.: Dr(a). Maria" />
+
+        <h3>Escolha seu avatar</h3>
+        <div id="avatar-selection" class="avatar-selection"></div>
+
+        <button id="start-button" class="primary-btn">Entrar no Hospital</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ESCRITÓRIO (estatísticas/seleção de especialidade) -->
+  <section id="office-screen" class="screen">
+    <div class="office-header">
+      <div class="office-profile">
+        <div id="office-avatar" class="office-avatar"></div>
+        <div>
+          <div id="office-name" class="office-name">—</div>
+          <div id="office-level" class="office-level">—</div>
+        </div>
+      </div>
+      <div class="office-scorebox">
+        <div class="score-label">Pontuação total</div>
+        <div id="office-score" class="score-value">0</div>
+      </div>
+    </div>
+    <div class="office-body">
+      <div class="office-card">
+        <h3>Estatísticas</h3>
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-label">Casos</div><div id="stat-total" class="stat-value">0</div></div>
+          <div class="stat"><div class="stat-label">Acertos</div><div id="stat-correct" class="stat-value">0</div></div>
+          <div class="stat"><div class="stat-label">Erros</div><div id="stat-incorrect" class="stat-value">0</div></div>
+          <div class="stat"><div class="stat-label">Óbitos</div><div id="stat-deaths" class="stat-value">0</div></div>
+        </div>
+        <div class="office-controls">
+          <div class="control">
+            <label>Especialidade</label>
+            <select id="specialty-select"></select>
+          </div>
+          <div class="control">
+            <label>Modo</label>
+            <select id="mode-select">
+              <option value="training">Treinamento (mais leve)</option>
+              <option value="shift">Plantão (pressão real)</option>
+            </select>
+          </div>
+        </div>
+        <button id="next-case-button" class="primary-btn">Próximo caso</button>
+        <button id="back-office" class="ghost-btn" style="margin-top:10px;">Voltar (trocar perfil)</button>
+      </div>
+      <div class="office-card">
+        <h3>Seu Cargo</h3>
+        <div class="profile-row">
+          <img id="player-avatar" class="mini-avatar" alt="avatar" style="display:none;" />
+          <div>
+            <div id="player-name-display" class="profile-name">—</div>
+            <div class="muted">Evolua para subir de nível e cargo.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- JOGO (fila e atendimento) -->
+  <section id="game-screen" class="screen">
+    <div class="top-bar">
+      <div class="top-left">
+        <div class="top-pill">
+          <span id="level-display">Nível 1</span>
+        </div>
+        <div class="top-pill">
+          <span id="score-display">Pontuação: 0</span>
+        </div>
+      </div>
+      <button id="pause-btn" class="ghost-btn">Pausar</button>
+    </div>
+    <div class="game-layout">
+      <div class="patients-panel">
+        <h3>Fila</h3>
+        <div id="patients-list" class="patients-list"></div>
+      </div>
+      <div class="patient-panel">
+        <div id="patient-details" class="patient-details"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERLAYS PARA EXAMES, TRATAMENTOS E DIAGNÓSTICO -->
+  <div id="exam-page" class="overlay hidden">
+    <div class="overlay-content">
+      <div id="exam-content"></div>
+      <button id="exam-back" class="overlay-back">Voltar ao atendimento</button>
+    </div>
+  </div>
+  <div id="treatment-page" class="overlay hidden">
+    <div class="overlay-content">
+      <div id="treatment-content"></div>
+      <button id="treatment-back" class="overlay-back">Voltar ao atendimento</button>
+    </div>
+  </div>
+  <div id="diagnosis-page" class="overlay hidden">
+    <div class="overlay-content">
+      <div id="diagnosis-content"></div>
+      <button id="diagnosis-back" class="overlay-back">Voltar ao atendimento</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY DE TUTORIAL -->
+  <!-- Essa tela é exibida na primeira vez que o jogador inicia o jogo. Ela explica de forma didática como jogar. -->
+  <div id="tutorial-page" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>Tutorial</h2>
+      <p>Bem‑vindo ao simulador! Nesta versão, você enfrentará casos clínicos reais e precisará solicitar exames, administrar medicações e indicar procedimentos.</p>
+      <p>Comece sempre colhendo a história clínica e fazendo o exame físico para entender o quadro. Em seguida, solicite exames laboratoriais e de imagem conforme necessário.</p>
+      <p>Cada caso possui exames e medicações mais indicados. Se estiver em dúvida, utilize o botão <strong>Dica</strong> para visualizar sugestões de exames, medicações e diagnóstico provável.</p>
+      <p>Escolha o modo <em>Treinamento</em> para uma experiência mais tranquila, com tempo de deterioração mais lento e menor penalidade por erros.</p>
+      <button id="tutorial-close" class="primary-btn">Começar</button>
+    </div>
+  </div>
+
+  <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
+
+  <!-- Carrega o script principal a partir do repositório original e, em seguida, o script de personalização local. -->
+  <script src="https://jonatanoficial-bit.github.io/Medical-Simulator-Vale-Editon/script.js" defer></script>
+  <script src="./custom.js" defer></script>
+</body>
+</html>

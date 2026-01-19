@@ -1,0 +1,77 @@
+[
+  {
+    "id": "case_appendicitis",
+    "specialty": "cirurgia",
+    "gender": "male",
+    "age": 25,
+    "complaint": "Dor abdominal intensa no quadrante inferior direito + náuseas.",
+    "history": "Dor iniciou peri-umbilical e migrou para FID. Náuseas, inapetência. Sem diarreia. Sem alergias conhecidas.",
+    "physicalExam": "Abdome com dor importante em FID, defesa voluntária. Sinal de Blumberg discreto. Desidratação leve.",
+    "diagnosis": "Apendicite aguda",
+    "differentials": ["Gastroenterite aguda", "Cólica renal", "Colecistite aguda"],
+    "initialSeverity": 0.35,
+    "requiredExams": ["Hemograma", "PCR", "TC abdome/pelve"],
+    "harmfulExams": ["RM crânio", "AngioTC de tórax"],
+    "requiredMeds": ["Dipirona IV", "SF 0,9% 500 mL", "Acesso venoso periférico"],
+    "harmfulMeds": ["Heparina IV", "Noradrenalina (vasopressor)"],
+    "examResults": {
+      "Hemograma": "Leucócitos 15.800 (neutrofilia). Hb 14.2. Plaquetas 280k.",
+      "PCR": "PCR 62 mg/L (elevada).",
+      "TC abdome/pelve": "Apendice espessado com densificação de gordura periappendicular. Sem abscesso."
+    },
+    "medEffects": {
+      "SF 0,9% 500 mL": { "severityDelta": -0.06, "delaySeconds": 6 },
+      "Dipirona IV": { "severityDelta": -0.05, "delaySeconds": 5 }
+    }
+  },
+  {
+    "id": "case_tep",
+    "specialty": "clinica",
+    "gender": "female",
+    "age": 42,
+    "complaint": "Falta de ar súbita + dor torácica pleurítica.",
+    "history": "Início súbito após viagem longa. Dor piora ao inspirar. Sem febre. Sem tosse produtiva. Sem alergias.",
+    "physicalExam": "Taquipneia, taquicardia, SatO2 baixa. Ausculta pulmonar sem estertores importantes.",
+    "diagnosis": "TEP (Tromboembolismo pulmonar)",
+    "differentials": ["Pneumonia comunitária", "Crise asmática", "Síndrome coronariana aguda"],
+    "initialSeverity": 0.55,
+    "requiredExams": ["ECG 12 derivações", "D-dímero", "AngioTC de tórax"],
+    "harmfulExams": ["TC abdome/pelve", "RM coluna"],
+    "requiredMeds": ["Oxigênio por máscara", "Heparina IV", "Monitorização contínua"],
+    "harmfulMeds": ["SF 0,9% 1000 mL", "Noradrenalina (vasopressor)"],
+    "examResults": {
+      "ECG 12 derivações": "Taquicardia sinusal. S1Q3T3 discreto.",
+      "D-dímero": "D-dímero 3.200 ng/mL (elevado).",
+      "AngioTC de tórax": "Falhas de enchimento em artérias pulmonares segmentares. Compatível com TEP."
+    },
+    "medEffects": {
+      "Oxigênio por máscara": { "severityDelta": -0.08, "delaySeconds": 4 },
+      "Heparina IV": { "severityDelta": -0.10, "delaySeconds": 10 }
+    }
+  },
+  {
+    "id": "case_opioid_overdose",
+    "specialty": "emergencia",
+    "gender": "male",
+    "age": 30,
+    "complaint": "Confusão, bradicardia e sonolência progressiva.",
+    "history": "Encontrado em casa sonolento. Pupilas puntiformes. Histórico suspeito de uso de opioides.",
+    "physicalExam": "Depressão respiratória, pupilas mióticas, rebaixamento do nível de consciência.",
+    "diagnosis": "Overdose de opioides",
+    "differentials": ["Hipoglicemia grave", "AVC isquêmico", "Sepse de foco pulmonar"],
+    "initialSeverity": 0.75,
+    "requiredExams": ["Glicemia capilar", "Gasometria arterial", "ECG 12 derivações"],
+    "harmfulExams": ["TC abdome/pelve"],
+    "requiredMeds": ["Naloxona IV", "Oxigênio por máscara", "Acesso venoso periférico"],
+    "harmfulMeds": ["Morfina IV"],
+    "examResults": {
+      "Glicemia capilar": "Glicemia 98 mg/dL.",
+      "Gasometria arterial": "pH 7,22. PaCO2 62. PaO2 58. Acidose respiratória por hipoventilação.",
+      "ECG 12 derivações": "Bradicardia sinusal."
+    },
+    "medEffects": {
+      "Naloxona IV": { "severityDelta": -0.25, "delaySeconds": 2 },
+      "Oxigênio por máscara": { "severityDelta": -0.08, "delaySeconds": 4 }
+    }
+  }
+]
