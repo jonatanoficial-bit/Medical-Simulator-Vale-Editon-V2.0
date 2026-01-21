@@ -12,6 +12,17 @@
 // inicializada no script base.
 window.addEventListener('DOMContentLoaded', () => {
   try {
+    // Mostra a animação de logo no início e, após alguns segundos, exibe a tela
+    // de capa. A duração da animação é definida também no CSS (fadeLogo).
+    const logoScreen = document.getElementById('logo-screen');
+    const coverScreen = document.getElementById('cover-screen');
+    if (logoScreen && coverScreen) {
+      // Garante que a capa só apareça após a animação de abertura
+      setTimeout(() => {
+        logoScreen.classList.remove('active');
+        coverScreen.classList.add('active');
+      }, 2800); // tempo em milissegundos correspondente à animação de fade
+    }
     // Ajusta o modo padrão para "Treinamento" (mais leve).
     const modeSelect = document.getElementById('mode-select');
     if (modeSelect) {

@@ -7,11 +7,22 @@
   <!-- Carregamos a folha de estilos original.  As imagens foram referenciadas via GitHub raw para dispensar arquivo local. -->
   <!-- Utilizamos a folha de estilos hospedada no repositório original. -->
   <link rel="stylesheet" href="https://jonatanoficial-bit.github.io/Medical-Simulator-Vale-Editon/style.css" />
+  <!-- Folha de estilo personalizada para ajustes de layout e elementos adicionais (logo inicial) -->
+  <link rel="stylesheet" href="./custom.css" />
 </head>
 <body>
 
+  <!-- TELA DE LOGO (animação de abertura) -->
+  <!-- Esta tela exibe o logo da Vale Games por alguns segundos ao iniciar o jogo. Ela é removida via script após o carregamento. -->
+  <section id="logo-screen" class="screen active">
+    <div class="logo-container">
+      <!-- A imagem do logo é carregada a partir da pasta local de imagens. -->
+      <img src="images/vale_games_logo.jpg" alt="Logo Vale Games" />
+    </div>
+  </section>
+
   <!-- TELA DE CAPA -->
-  <section id="cover-screen" class="screen active" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/capa.jpg')">
+  <section id="cover-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/capa.jpg')">
     <div class="cover-content">
       <h1>Simulador Médico</h1>
       <p>Toque em qualquer lugar para continuar</p>

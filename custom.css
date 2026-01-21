@@ -1,0 +1,93 @@
+/*
+ * Arquivo de estilos customizados.
+ *
+ * Este arquivo contém pequenos ajustes de layout para melhorar a experiência
+ * tanto em dispositivos móveis quanto em computadores. Ele também define
+ * estilos para a nova tela de abertura com o logo "Vale Games".
+ */
+
+/* Permite rolagem vertical da página para evitar que conteúdos importantes
+   fiquem cortados, principalmente em telas com altura limitada. Usamos
+   !important para sobrescrever a definição original de overflow:hidden. */
+html, body {
+  overflow-y: auto !important;
+}
+
+/* =========================================================
+   Correção de conteúdo cortado no jogo
+   - Em alguns PCs/notebooks com "zoom"/resolução diferente,
+     a caixa de mensagens/dicas pode ficar parcialmente fora
+     da área visível.
+   - Como as telas usam position:fixed, a rolagem deve existir
+     DENTRO dos painéis.
+   ========================================================= */
+
+/* Dá uma altura fixa ao miolo do jogo (abaixo da top-bar) e garante
+   que os painéis possam rolar internamente. */
+#game-screen {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mantém o layout do jogo dentro da viewport e faz o scroll dentro
+   dos painéis (fila e atendimento). */
+#game-screen .game-layout {
+  height: calc(100vh - 92px);
+  overflow: hidden;
+}
+
+#game-screen .patients-panel,
+#game-screen .patient-panel {
+  max-height: 100%;
+  overflow: auto;
+}
+
+/* Reserva um "respiro" no fim do painel do paciente para evitar que o
+   conteúdo encoste no limite inferior da tela. */
+#game-screen .patient-details {
+  padding-bottom: 18px;
+}
+
+/* A caixa onde aparecem "História Clínica" / "Dicas" / etc.
+   Agora ela pode rolar quando o texto for grande. */
+#game-screen .info-container {
+  max-height: min(260px, 28vh);
+  overflow: auto;
+}
+
+/* iOS: rolagem mais suave */
+#game-screen .patients-panel,
+#game-screen .patient-panel,
+#game-screen .info-container {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Configuração da tela de logo. A classe .screen já define posição fixa
+   e centraliza verticalmente o conteúdo. Aqui definimos um fundo escuro e
+   centralizamos a imagem do logo. */
+#logo-screen {
+  background: radial-gradient(800px 600px at 50% 50%, #0a1a24 0%, #01080e 100%);
+  z-index: 100; /* garante que o logo fique na frente de outras telas */
+}
+
+#logo-screen .logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#logo-screen img {
+  max-width: 70%;
+  height: auto;
+  filter: drop-shadow(0 0 20px rgba(0,0,0,0.6));
+  /* Suave transição de opacidade: o logo aparece e desaparece gradualmente. */
+  animation: fadeLogo 2.8s ease forwards;
+}
+
+@keyframes fadeLogo {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
