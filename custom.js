@@ -30,15 +30,145 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // Quando a engine estiver disponível, ajusta configurações de dificuldade.
+    // Objetivo: desacelerar BEM a evolução para óbito e deixar o modo
+    // Treinamento viável para iniciantes:
+    // - 1 paciente por vez (sem fila grande)
+    // - tempo do caso mais lento (tick mais demorado)
+    // - intervalo entre pacientes (pequena pausa após finalizar)
     if (window.engine && window.engine.config) {
-      // Deterioração mais lenta e penalidade reduzida no modo de treinamento.
-      if (window.engine.config.training) {
-        window.engine.config.training.deteriorationMultiplier = 0.35;
-        window.engine.config.training.penaltyMultiplier = 0.25;
+      const cfg = window.engine.config;
+
+      // ------------------------------------------------------------
+      // (A) Desacelerar MUITO a evolução
+      // ------------------------------------------------------------
+
+      // 1) Deterioração mais lenta (principal ajuste).
+      // - Treinamento: bem mais "humano" para iniciantes.
+      if (cfg.training) {
+        // Bem mais lento (tempo para pedir exames, aguardar resultado,
+        // medicar e fechar diagnóstico).
+        cfg.training.deteriorationMultiplier = 0.05;
+        cfg.training.penaltyMultiplier = 0.15;
       }
-      // Aumenta o intervalo para chegada de novos pacientes para dar mais
-      // tempo ao jogador (em milissegundos).
-      window.engine.config.baseNewPatientIntervalMs = 20000;
+      // - Se existir um modo "casual"/"easy"/"story", suaviza também.
+      if (cfg.casual) {
+        cfg.casual.deteriorationMultiplier = Math.min(cfg.casual.deteriorationMultiplier ?? 0.30, 0.25);
+      }
+
+      // 2) Relógio do paciente mais lento (tick mais demorado).
+      // O engine incrementa p.time em +1 por tick. Aumentando o tickMs, o tempo
+      // "do caso" passa mais devagar no mundo real.
+      cfg.tickMs = 2000; // 2s por tick (antes ~1s)
+
+      // 3) 1 paciente por vez: desliga a "fila" automática.
+      // Em vez de spawn periódico, só entra um novo paciente quando não houver
+      // ninguém sendo atendido.
+      cfg.baseNewPatientIntervalMs = 99999999;
+
+      // 4) Se o motor tiver outros intervalos, aumentamos também.
+      const maybeIntervalKeys = [
+        'vitalsTickMs',
+        'vitalsUpdateIntervalMs',
+        'patientUpdateIntervalMs',
+        'baseTickMs',
+        'tickMs',
+        'updateIntervalMs',
+      ];
+      for (const k of maybeIntervalKeys) {
+        if (typeof cfg[k] === 'number' && isFinite(cfg[k]) && cfg[k] > 100) {
+          cfg[k] = Math.round(cfg[k] * 2.0);
+        }
+      }
+
+      // 5) Se houver multiplicador global de tempo/deterioração, reduz também.
+      if (typeof cfg.deteriorationMultiplier === 'number') {
+        cfg.deteriorationMultiplier = Math.min(cfg.deteriorationMultiplier, 0.6);
+      }
+
+      // ------------------------------------------------------------
+      // (B) Implementar "1 paciente por vez" + pausa entre casos
+      // ------------------------------------------------------------
+      const engine = window.engine;
+
+      // Monkeypatch do spawnPatient: só gera novo paciente se não existir nenhum.
+      // Também cria uma pequena pausa ao finalizar o caso.
+      if (!engine.__valePatchedSinglePatient) {
+        engine.__valePatchedSinglePatient = true;
+
+        const originalSpawn = engine.spawnPatient?.bind(engine);
+        const SPAWN_DELAY_MS = 4000; // pausa entre casos (ajustável)
+
+        engine.spawnPatient = function patchedSpawnPatient() {
+          // Se já existe paciente em jogo, não cria outro.
+          if (Array.isArray(this.patients) && this.patients.length > 0) return;
+
+          // Se estiver em "cooldown", agenda e sai.
+          const now = Date.now();
+          const readyAt = this.__nextAllowedSpawnAt || 0;
+          if (now < readyAt) {
+            clearTimeout(this.__spawnTimer);
+            this.__spawnTimer = setTimeout(() => {
+              this.spawnPatient();
+            }, Math.max(0, readyAt - now));
+            return;
+          }
+
+          // Spawna agora.
+          originalSpawn?.();
+        };
+
+        // Monkeypatch do start():
+        // - inicia com 1 paciente
+        // - não cria fila (remove o spawn duplo do original)
+        // - mantém apenas o tick
+        const originalStart = engine.start?.bind(engine);
+        engine.start = function patchedStart() {
+          // Chama o start original primeiro para inicializar tudo...
+          originalStart?.();
+
+          // ...mas remove qualquer paciente extra que tenha sido criado.
+          if (Array.isArray(this.patients) && this.patients.length > 1) {
+            this.patients = [this.patients[0]];
+            this.activePatientId = this.patients[0]?.id || null;
+            this.ui?.refreshPatients?.(this.patients, this.activePatientId);
+          }
+
+          // Desliga o intervalo de novos pacientes (mantém 1 por vez).
+          if (this.newPatientInterval) {
+            clearInterval(this.newPatientInterval);
+            this.newPatientInterval = null;
+          }
+        };
+
+        // Monkeypatch: após finalizar um caso, força um pequeno intervalo antes
+        // de permitir novo spawn (mantém a lógica do engine sem reescrever tudo).
+        const originalEvaluate = engine.evaluateCase?.bind(engine);
+        if (originalEvaluate) {
+          engine.evaluateCase = function patchedEvaluateCase(patient) {
+            // Impede spawn imediato: configura um cooldown antes de qualquer spawn.
+            this.__nextAllowedSpawnAt = Date.now() + SPAWN_DELAY_MS;
+
+            // Executa lógica original.
+            originalEvaluate(patient);
+
+            // Se o original já tentou colocar mais pacientes, garante 1 só.
+            if (Array.isArray(this.patients) && this.patients.length > 1) {
+              this.patients = [this.patients[0]];
+              this.activePatientId = this.patients[0]?.id || null;
+              this.ui?.refreshPatients?.(this.patients, this.activePatientId);
+            }
+
+            // Se ficou vazio, agenda novo paciente (respeitando o cooldown).
+            if (!this.patients || this.patients.length === 0) {
+              clearTimeout(this.__spawnTimer);
+              const wait = Math.max(0, (this.__nextAllowedSpawnAt || 0) - Date.now());
+              this.__spawnTimer = setTimeout(() => {
+                this.spawnPatient();
+              }, wait);
+            }
+          };
+        }
+      }
     }
 
     // Define se o tutorial já foi concluído com base no localStorage.
