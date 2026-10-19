@@ -91,3 +91,22 @@ html, body {
   85% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+/* Aviso persistente e foco visível sem alterar fundos, capas ou avatares. */
+.safety-notice {
+  margin-top: 14px !important;
+  padding: 10px 12px;
+  border-left: 3px solid rgba(120, 200, 255, 0.85);
+  background: rgba(5, 18, 28, 0.42);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.84) !important;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #8fd3ff;
+  outline-offset: 3px;
+}
