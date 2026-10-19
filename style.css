@@ -1,0 +1,714 @@
+/* ============================================================
+   Simulador Médico - UI local V3 (Mobile-first)
+   Ajustes: responsividade real no mobile + layout sem “metade cortada”
+   ============================================================ */
+
+:root{
+  --bg1:#0e1b22;
+  --bg2:#102a36;
+  --panel: rgba(18, 28, 40, 0.62);
+  --panel2: rgba(18, 28, 40, 0.78);
+  --stroke: rgba(255,255,255,0.10);
+  --stroke2: rgba(255,255,255,0.14);
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.65);
+  --muted2: rgba(255,255,255,0.50);
+  --good: #4cd964;
+  --bad: #ff3b30;
+  --warn: #ffcc00;
+  --shadow: 0 18px 55px rgba(0,0,0,0.45);
+  --radius: 22px;
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 70% 10%, #1b3d48 0%, var(--bg1) 55%, #0b1116 100%);
+  overflow:hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+.muted{ color: var(--muted); }
+.ok{ color: var(--good); }
+.bad{ color: var(--bad); }
+
+/* Base de telas */
+.screen{
+  position: fixed;
+  inset: 0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding: 22px 14px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.screen.active{ display:flex; }
+
+/* ===== Cover ===== */
+#cover-screen{
+  background-image: url("images/capa.jpg");
+}
+
+#cover-screen::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(900px 700px at 50% 20%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.65) 100%);
+}
+
+.cover-content{
+  position: relative;
+  z-index: 2;
+  width: min(520px, 92vw);
+  padding: 26px 22px;
+  border-radius: 26px;
+  background: rgba(16, 24, 34, 0.55);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  text-align:center;
+}
+
+.cover-content h1{
+  margin: 0 0 6px;
+  font-size: 40px;
+  letter-spacing: 0.4px;
+}
+
+.cover-content p{
+  margin: 4px 0;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* ===== Welcome ===== */
+#welcome-screen{
+  background-image: url("images/hospital_corridor.png");
+}
+.welcome-content{
+  width: min(780px, 94vw);
+}
+.welcome-panel{
+  padding: 22px 18px;
+  border-radius: 26px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+.welcome-panel h2{ margin: 0 0 10px; font-size: 26px; }
+.welcome-panel p{ margin: 10px 0; color: var(--muted); line-height: 1.35; }
+.hint{
+  margin-top: 14px;
+  color: var(--muted2);
+  font-size: 14px;
+}
+
+/* ===== Lobby ===== */
+#lobby-screen{
+  background-image: url("images/bg_hospital_02.jpg");
+}
+.lobby-content{
+  width: min(760px, 94vw);
+  padding: 22px 18px;
+  border-radius: 26px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+.player-setup label{ display:block; margin: 8px 0 6px; color: var(--muted); }
+.player-setup input{
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke2);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+  outline:none;
+}
+.player-setup h3{ margin: 16px 0 10px; }
+
+.avatar-selection{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.avatar-btn{
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.18);
+  border-radius: 16px;
+  padding: 10px;
+  color: var(--text);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap: 6px;
+  cursor:pointer;
+}
+.avatar-btn img{
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid var(--stroke2);
+}
+.avatar-btn.selected{
+  border-color: rgba(120,200,255,0.55);
+  box-shadow: 0 0 0 2px rgba(120,200,255,0.22) inset;
+}
+
+.primary-btn, .ghost-btn{
+  width: 100%;
+  padding: 14px 14px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  cursor:pointer;
+  font-weight: 700;
+  margin-top: 14px;
+}
+.primary-btn{
+  background: rgba(110, 180, 255, 0.18);
+}
+.ghost-btn{
+  background: rgba(0,0,0,0.18);
+}
+
+/* ===== Office ===== */
+#office-screen{
+  background-image: url("images/consultorio.png");
+}
+
+.office-header{
+  width: min(980px, 96vw);
+  display:flex;
+  gap: 12px;
+  align-items:center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.office-profile{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.office-avatar{
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.20);
+  background-size: cover;
+  background-position: center;
+}
+
+.office-name{ font-size: 18px; font-weight: 800; }
+.office-level{ color: var(--muted); font-size: 13px; }
+
+.office-scorebox{
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 10px 35px rgba(0,0,0,0.35);
+  backdrop-filter: blur(10px);
+  text-align:right;
+}
+.score-label{ color: var(--muted); font-size: 12px; }
+.score-value{ font-weight: 900; font-size: 18px; }
+
+.office-body{
+  width: min(980px, 96vw);
+  display:grid;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 12px;
+}
+
+.office-card{
+  padding: 16px 16px;
+  border-radius: 22px;
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+.office-card h3{ margin: 0 0 10px; }
+
+.stats-grid{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.stat{
+  padding: 10px 10px;
+  border-radius: 18px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid var(--stroke);
+}
+.stat-label{ color: var(--muted); font-size: 12px; }
+.stat-value{ font-weight: 900; font-size: 18px; }
+
+.office-controls{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.control label{ color: var(--muted); display:block; margin-bottom: 6px; font-size: 12px; }
+.control select{
+  width:100%;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke2);
+  background: rgba(0,0,0,0.22);
+  color: var(--text);
+  outline:none;
+}
+
+.profile-row{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+}
+.mini-avatar{
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  object-fit: cover;
+}
+.profile-name{ font-weight: 900; font-size: 18px; }
+
+/* ============================================================
+   ===== GAME (AQUI É O PRINCIPAL AJUSTE DO MOBILE) =====
+   - Em vez de centralizar via flex, o game vira layout em bloco
+   - Garante 1 coluna no mobile (nada cortado)
+   - Scroll correto dentro dos painéis
+   ============================================================ */
+
+#game-screen{
+  background-image: url("images/fundo.jpg");
+  padding: 16px 10px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* IMPORTANTE: no game NÃO centralizar como flex (evita “metade cortada” em vários mobiles) */
+#game-screen.screen.active{
+  display:block;
+  overflow:hidden;
+}
+
+.top-bar{
+  width: min(1060px, 98vw);
+  margin: 0 auto 10px auto;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.top-left{
+  display:flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.top-pill{
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--panel2);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.game-layout{
+  width: min(1060px, 98vw);
+  margin: 0 auto;
+  display:grid;
+  grid-template-columns: 0.42fr 0.58fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.patients-panel, .patient-panel{
+  border-radius: 22px;
+  background: var(--panel2);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+  padding: 14px 14px;
+  min-width: 0;
+}
+
+.patients-panel h3{ margin: 0 0 10px; }
+.patients-list{
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.patient-card{
+  padding: 12px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.14);
+  cursor:pointer;
+}
+.patient-card.active{
+  border-color: rgba(120,200,255,0.55);
+  box-shadow: 0 0 0 2px rgba(120,200,255,0.18) inset;
+}
+.patient-card-top{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items:center;
+}
+.patient-name{ font-weight: 900; }
+.patient-complaint{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.2;
+}
+.patient-status{
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.18);
+}
+.status-critical{ border-color: rgba(255, 59, 48, 0.55); color: #ffd1cf; }
+.status-unstable{ border-color: rgba(255, 204, 0, 0.45); color: #fff0b8; }
+.status-stable{ border-color: rgba(76, 217, 100, 0.45); color: #d7ffe1; }
+.status-dead{ border-color: rgba(255, 59, 48, 0.65); color: #ffd1cf; }
+
+.patient-details{
+  width: 100%;
+}
+
+.patient-header{
+  display:grid;
+  grid-template-columns: 90px 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.patient-portrait{
+  width: 90px;
+  height: 90px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(0,0,0,0.20);
+}
+
+.patient-main h2{
+  margin: 0;
+  font-size: 18px;
+}
+
+.patient-sub{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+
+.badge{
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.16);
+  border: 1px solid var(--stroke);
+  color: var(--text);
+  font-weight: 800;
+}
+.dot{ opacity: 0.6; }
+
+.patient-complaint-big{
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.vitals-box{
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  padding: 12px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.14);
+}
+.vitals-box h3{ margin: 0 0 8px; font-size: 14px; }
+.vitals-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+.vital{
+  display:flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.vital b{ color: var(--text); }
+
+.actions-area{
+  margin-top: 10px;
+}
+.actions-row{
+  display:grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.action-btn{
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.16);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 10px 10px;
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  justify-content:flex-start;
+  cursor:pointer;
+}
+.action-btn i{ font-style: normal; opacity: 0.95; }
+
+.info-container{
+  margin-top: 10px;
+  padding: 12px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,0.08);
+}
+.info-container h4{ margin: 0 0 8px; }
+
+.info-container pre{
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgba(0,0,0,0.85);
+  background: rgba(255,255,255,0.82);
+  padding: 10px;
+  border-radius: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}
+
+/* ===== Overlays ===== */
+.overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+.overlay.hidden{ display:none; }
+
+.overlay-content{
+  width: min(980px, 96vw);
+  max-height: 90vh;
+  overflow:auto;
+  padding: 14px;
+  border-radius: 24px;
+  background: var(--panel2);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.overlay-hero{
+  height: 150px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background-size: cover;
+  background-position: center;
+  margin-bottom: 12px;
+}
+
+.grid-list{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+.grid-item{
+  padding: 12px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.16);
+  color: var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+.overlay-back{
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.16);
+  color: var(--text);
+  cursor:pointer;
+  margin-top: 12px;
+}
+
+.dx-search{
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke2);
+  background: rgba(0,0,0,0.22);
+  color: var(--text);
+  outline: none;
+}
+.dx-list{
+  margin-top: 12px;
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dx-item{
+  padding: 12px 12px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.16);
+  color: var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+
+.report-content h2{ margin: 0 0 8px; }
+.report-grid{
+  margin-top: 12px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.report-card{
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.14);
+}
+.report-card h3{ margin: 0 0 8px; font-size: 14px; }
+
+.result-box{
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.14);
+}
+.result-box pre{
+  margin:0;
+  white-space: pre-wrap;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* ===== Toast ===== */
+.toast{
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,0.60);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+  z-index: 80;
+}
+.toast.show{ opacity: 1; }
+
+/* ============================================================
+   Responsive
+   - GARANTE que no mobile a consulta vira 1 coluna e nada corta
+   ============================================================ */
+
+@media (max-width: 1100px){
+  /* força o game a virar 1 coluna mais cedo (evita aparelhos “estranhos”) */
+  .game-layout{ grid-template-columns: 1fr; }
+}
+
+@media (max-width: 980px){
+  .office-body{ grid-template-columns: 1fr; }
+  .stats-grid{ grid-template-columns: repeat(2, 1fr); }
+
+  /* Office header: avatar/perfil mais natural em cima/esquerda no mobile */
+  .office-header{
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: min(980px, 96vw);
+  }
+  .office-scorebox{
+    width: 100%;
+    text-align:left;
+  }
+
+  /* Game */
+  .game-layout{
+    grid-template-columns: 1fr;
+  }
+
+  /* altura com scroll real (sem cortar) */
+  .patients-panel{
+    max-height: 34vh;
+    overflow: auto;
+  }
+  .patient-panel{
+    max-height: calc(100vh - 92px - 34vh - 12px);
+    overflow: auto;
+  }
+
+  .actions-row{
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .avatar-selection{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 360px){
+  .cover-content h1{ font-size: 34px; }
+  .grid-list{ grid-template-columns: 1fr; }
+  .report-grid{ grid-template-columns: 1fr; }
+
+  .patient-header{
+    grid-template-columns: 78px 1fr;
+  }
+  .patient-portrait{
+    width: 78px;
+    height: 78px;
+    border-radius: 20px;
+  }
+}
