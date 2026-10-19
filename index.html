@@ -4,9 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Simulador Médico (Atualizado)</title>
-  <!-- Carregamos a folha de estilos original.  As imagens foram referenciadas via GitHub raw para dispensar arquivo local. -->
-  <!-- Utilizamos a folha de estilos hospedada no repositório original. -->
-  <link rel="stylesheet" href="https://jonatanoficial-bit.github.io/Medical-Simulator-Vale-Editon/style.css" />
+  <!-- Motor visual local. Os fundos e avatares continuam carregados da pasta images deste projeto. -->
+  <link rel="stylesheet" href="./style.css" />
   <!-- Folha de estilo personalizada para ajustes de layout e elementos adicionais (logo inicial) -->
   <link rel="stylesheet" href="./custom.css" />
 </head>
@@ -22,7 +21,7 @@
   </section>
 
   <!-- TELA DE CAPA -->
-  <section id="cover-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/capa.jpg')">
+  <section id="cover-screen" class="screen">
     <div class="cover-content">
       <h1>Simulador Médico</h1>
       <p>Toque em qualquer lugar para continuar</p>
@@ -31,19 +30,19 @@
   </section>
 
   <!-- BOAS-VINDAS -->
-  <section id="welcome-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/hospital_corridor.png')">
+  <section id="welcome-screen" class="screen">
     <div class="welcome-content">
       <div class="welcome-panel">
         <h2>Bem-vindo ao Plantão</h2>
-        <p>Você está entrando em um pronto‑socorro movimentado. Aqui, cada decisão impacta sinais vitais, tempo de resposta e desfechos.</p>
-        <p>Use exames e medicações com estratégia. Você pode solicitar opções desnecessárias — mas isso pode reduzir sua pontuação.</p>
+        <p>Você está entrando em um pronto-socorro fictício. Observe as pistas, compare possibilidades e acompanhe as consequências narrativas das suas escolhas.</p>
+        <p class="safety-notice">Experiência de entretenimento: não substitui formação, protocolos nem orientação de profissionais de saúde.</p>
         <div class="hint">Toque para continuar…</div>
       </div>
     </div>
   </section>
 
   <!-- LOBBY (configuração de perfil) -->
-  <section id="lobby-screen" class="screen" style="background-image:url('https://raw.githubusercontent.com/jonatanoficial-bit/Medical-Simulator-Vale-Editon/main/images/bg_hospital_02.jpg')">
+  <section id="lobby-screen" class="screen">
     <div class="lobby-content">
       <h2>Seu Perfil</h2>
       <div class="player-setup">
@@ -90,8 +89,8 @@
           <div class="control">
             <label>Modo</label>
             <select id="mode-select">
-              <option value="training">Treinamento (mais leve)</option>
-              <option value="shift">Plantão (pressão real)</option>
+              <option value="training">Treinamento (guiado)</option>
+              <option value="shift">Plantão (pressão)</option>
             </select>
           </div>
         </div>
@@ -157,21 +156,20 @@
 
   <!-- OVERLAY DE TUTORIAL -->
   <!-- Essa tela é exibida na primeira vez que o jogador inicia o jogo. Ela explica de forma didática como jogar. -->
-  <div id="tutorial-page" class="overlay hidden">
+  <div id="tutorial-page" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
     <div class="overlay-content">
-      <h2>Tutorial</h2>
-      <p>Bem‑vindo ao simulador! Nesta versão, você enfrentará casos clínicos reais e precisará solicitar exames, administrar medicações e indicar procedimentos.</p>
-      <p>Comece sempre colhendo a história clínica e fazendo o exame físico para entender o quadro. Em seguida, solicite exames laboratoriais e de imagem conforme necessário.</p>
-      <p>Cada caso possui exames e medicações mais indicados. Se estiver em dúvida, utilize o botão <strong>Dica</strong> para visualizar sugestões de exames, medicações e diagnóstico provável.</p>
-      <p>Escolha o modo <em>Treinamento</em> para uma experiência mais tranquila, com tempo de deterioração mais lento e menor penalidade por erros.</p>
-      <button id="tutorial-close" class="primary-btn">Começar</button>
+      <h2 id="tutorial-title">Antes do primeiro turno</h2>
+      <p>Este jogo apresenta cenários fictícios de tomada de decisão. Leia a situação, descubra pistas e escolha um caminho dentro das regras do turno.</p>
+      <p>O feedback explica as consequências no universo do jogo; ele não é protocolo, prescrição ou recomendação aplicável fora da experiência.</p>
+      <p>O modo <em>Treinamento</em> oferece mais tempo para observar. No modo <em>Plantão</em>, o mesmo cenário pede decisões mais rápidas.</p>
+      <button id="tutorial-close" class="primary-btn">Entendi, iniciar turno</button>
     </div>
   </div>
 
   <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
 
-  <!-- Carrega o script principal a partir do repositório original e, em seguida, o script de personalização local. -->
-  <script src="https://jonatanoficial-bit.github.io/Medical-Simulator-Vale-Editon/script.js" defer></script>
+  <!-- Carrega o motor local e, em seguida, melhorias de interface sem alterar a engine em runtime. -->
+  <script src="./script.js" defer></script>
   <script src="./custom.js" defer></script>
 </body>
 </html>
