@@ -135,6 +135,27 @@ function fillSpecialties(cases, select){
   }
 }
 
+/* As cenas não carregam conteúdo clínico novo: apenas dão contexto espacial
+   aos cenários que já existem no catálogo revisável do projeto. */
+function getScenarioPresentation(specialty){
+  const key = normalize(specialty);
+  if (key === "cirurgia") return {
+    location: "Ala Cirúrgica",
+    area: "Triagem cirúrgica",
+    note: "Um novo prontuário chegou da área de avaliação. Organize as pistas antes de encerrar o cenário."
+  };
+  if (key === "clinica") return {
+    location: "Sala de Observação",
+    area: "Atendimento clínico",
+    note: "O caso está em observação. Reúna as informações que o cenário oferece antes da decisão final."
+  };
+  return {
+    location: "Ala de Emergência",
+    area: "Baia de estabilização",
+    note: "A equipe abriu uma nova baia. Observe o cenário, registre as descobertas e acompanhe cada retorno."
+  };
+}
+
 // ================================
 // Engine
 // ================================
@@ -165,6 +186,7 @@ class GameEngine {
 
     this.cases = [];
     this.catalog = null;
+    this.lastCaseId = null;
 
     this.loaded = false;
     this.specialtyFilter = "all";
@@ -297,7 +319,12 @@ class GameEngine {
     });
 
     const list = candidate.length ? candidate : this.cases;
-    const caseData = list[Math.floor(Math.random() * list.length)];
+    // Evita que a mesma situação apareça duas vezes em sequência. Quando o
+    // jogador esgota a rotação disponível, o catálogo volta a ficar elegível.
+    const rotatedList = list.filter(c => c.id !== this.lastCaseId);
+    const availableCases = rotatedList.length ? rotatedList : list;
+    const caseData = availableCases[Math.floor(Math.random() * availableCases.length)];
+    this.lastCaseId = caseData.id;
 
     const id = `p_${Date.now()}_${Math.floor(Math.random()*9999)}`;
     const gender = caseData.gender || (Math.random() > 0.5 ? "male" : "female");
@@ -305,6 +332,8 @@ class GameEngine {
     const patient = {
       id,
       caseId: caseData.id,
+      specialty: caseData.specialty || "emergencia",
+      scenario: getScenarioPresentation(caseData.specialty),
       name: randomName(gender),
       gender,
       age: caseData.age || randomBetweenInt(18,80),
@@ -769,6 +798,7 @@ class GameUI {
     const portrait = p.gender === "female" ? "images/patient_female.png" : "images/patient_male.png";
 
     const status = this.statusLabel(p);
+    const scenario = p.scenario || getScenarioPresentation(p.specialty);
     const requested = p.requested || { history:false, physical_exam:false, exams:[], meds:[], results:[] };
     const pendingExams = (p.queuedEffects || []).filter(effect => effect.type === "exam_result");
     const receivedResults = requested.results || [];
@@ -778,6 +808,8 @@ class GameUI {
       : pendingExams.length
         ? "Há resultado em processamento. Você pode aguardar ou continuar explorando o cenário."
         : "Quando estiver pronto, registre a decisão final para receber o debriefing do turno.";
+
+    this.updateScenarioLocation(scenario);
 
     this.patientDetails.innerHTML = `
       <div class="patient-header">
@@ -806,6 +838,15 @@ class GameUI {
       </div>
 
       <div class="actions-area">
+        <section class="case-brief" aria-label="Contexto do cenário">
+          <div class="case-brief-topline">
+            <span class="eyebrow">CASO ${engine.casesAttended + 1}</span>
+            <span class="case-area">${scenario.area}</span>
+          </div>
+          <h3>${scenario.location}</h3>
+          <p>${scenario.note}</p>
+        </section>
+
         <section class="turn-guide" aria-label="Acompanhamento do turno">
           <div class="turn-guide-header">
             <div>
@@ -876,6 +917,12 @@ class GameUI {
         if (result) this.showExamResult(result.examKey, result.result);
       });
     });
+  }
+
+  updateScenarioLocation(scenario){
+    const label = scenario?.location || "Ala de Emergência";
+    const locationArea = document.getElementById("game-location-area");
+    if (locationArea) locationArea.textContent = label;
   }
 
   showInfo(title, text){
@@ -1015,7 +1062,7 @@ class GameUI {
     overlay.innerHTML = `
       <div class="overlay-content report-content">
         <h2>Debriefing do turno</h2>
-        <div class="muted">${patient.name} • ${patient.age} anos • Desfecho do cenário: <b class="${outcome === "death" ? "bad" : "ok"}">${outcome === "death" ? "Encerramento crítico" : "Caso encerrado"}</b></div>
+        <div class="muted">${patient.name} • ${patient.age} anos • ${patient.scenario?.location || "Hospital Vale"} • Desfecho do cenário: <b class="${outcome === "death" ? "bad" : "ok"}">${outcome === "death" ? "Encerramento crítico" : "Caso encerrado"}</b></div>
 
         <div class="report-grid">
           <div class="report-card">
