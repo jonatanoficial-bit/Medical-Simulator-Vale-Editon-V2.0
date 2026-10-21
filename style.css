@@ -184,7 +184,13 @@ html, body{
 
 /* ===== Office ===== */
 #office-screen{
-  background-image: url("images/consultorio.png");
+  /* A imagem anterior não existia no projeto. Este corredor/consultório já
+     faz parte da direção de arte local e mantém a chegada ao hospital contínua. */
+  background-image:
+    linear-gradient(90deg, rgba(3, 12, 19, 0.76) 0%, rgba(3, 12, 19, 0.54) 48%, rgba(3, 12, 19, 0.74) 100%),
+    url("images/hospital_corridor.png");
+  background-position: center, center;
+  background-size: cover;
 }
 
 .office-header{
@@ -298,7 +304,13 @@ html, body{
    ============================================================ */
 
 #game-screen{
-  background-image: url("images/fundo.jpg");
+  /* A ala de atendimento usa uma arte hospitalar existente; não há troca ou
+     edição de fundos, somente a conexão visual entre as telas do jogo. */
+  background-image:
+    linear-gradient(110deg, rgba(2, 10, 17, 0.78) 0%, rgba(4, 17, 25, 0.64) 46%, rgba(2, 10, 17, 0.76) 100%),
+    url("images/hospital_corridor.png");
+  background-position: center, center;
+  background-size: cover;
   padding: 16px 10px;
   align-items: flex-start;
   justify-content: center;

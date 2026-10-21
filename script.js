@@ -319,7 +319,7 @@ class GameEngine {
       harmfulMeds: caseData.harmfulMeds || [],
       examResults: caseData.examResults || {},
       medEffects: caseData.medEffects || {},
-      requested: { history:false, physical_exam:false, exams:[], meds:[], diagnosis:null },
+      requested: { history:false, physical_exam:false, exams:[], meds:[], results:[], diagnosis:null },
       queuedEffects: [],
       time: 0,
       severity: clamp(caseData.initialSeverity ?? 0.22, 0, 1),
@@ -364,7 +364,11 @@ class GameEngine {
     if (action === "request_exam"){
       const examKey = payload?.examKey;
       if (!examKey) return;
-      if (!p.requested.exams.includes(examKey)) p.requested.exams.push(examKey);
+      if (p.requested.exams.includes(examKey)){
+        this.ui.toast(`Este pedido já está no prontuário do turno.`);
+        return;
+      }
+      p.requested.exams.push(examKey);
 
       const baseDelay = getExamDelaySeconds(examKey);
       const mult = this.mode === "training" ? 0.55 : 1.0;
@@ -374,13 +378,18 @@ class GameEngine {
       p.queuedEffects.push({ type:"exam_result", examKey, result, readyAt: p.time + delay });
 
       this.ui.toast(`Exame solicitado: ${examKey} (resultado em ~${delay}s)`);
+      this.ui.renderPatientDetails(p, this);
       return;
     }
 
     if (action === "give_med"){
       const medKey = payload?.medKey;
       if (!medKey) return;
-      if (!p.requested.meds.includes(medKey)) p.requested.meds.push(medKey);
+      if (p.requested.meds.includes(medKey)){
+        this.ui.toast(`Esta ação já foi registrada no turno.`);
+        return;
+      }
+      p.requested.meds.push(medKey);
 
       const eff = p.medEffects?.[medKey];
       if (eff){
@@ -389,6 +398,7 @@ class GameEngine {
       }
 
       this.ui.toast(`Aplicado: ${medKey}`);
+      this.ui.renderPatientDetails(p, this);
       return;
     }
 
@@ -407,6 +417,7 @@ class GameEngine {
 
     for (const e of ready){
       if (e.type === "exam_result"){
+        patient.requested.results.push({ examKey: e.examKey, result: e.result });
         this.ui.showExamResult(e.examKey, e.result);
       } else if (e.type === "med_effect"){
         const delta = e.effect.severityDelta || 0;
@@ -758,6 +769,15 @@ class GameUI {
     const portrait = p.gender === "female" ? "images/patient_female.png" : "images/patient_male.png";
 
     const status = this.statusLabel(p);
+    const requested = p.requested || { history:false, physical_exam:false, exams:[], meds:[], results:[] };
+    const pendingExams = (p.queuedEffects || []).filter(effect => effect.type === "exam_result");
+    const receivedResults = requested.results || [];
+    const explorationCount = Number(requested.history) + Number(requested.physical_exam);
+    const nextStep = !requested.history || !requested.physical_exam
+      ? "Leia a história e faça o exame físico para reunir as pistas do cenário."
+      : pendingExams.length
+        ? "Há resultado em processamento. Você pode aguardar ou continuar explorando o cenário."
+        : "Quando estiver pronto, registre a decisão final para receber o debriefing do turno.";
 
     this.patientDetails.innerHTML = `
       <div class="patient-header">
@@ -786,10 +806,26 @@ class GameUI {
       </div>
 
       <div class="actions-area">
+        <section class="turn-guide" aria-label="Acompanhamento do turno">
+          <div class="turn-guide-header">
+            <div>
+              <span class="eyebrow">SEU TURNO</span>
+              <h3>Acompanhe suas descobertas</h3>
+            </div>
+            <span class="turn-progress">${explorationCount}/2 pistas iniciais</span>
+          </div>
+          <p>${nextStep}</p>
+          <div class="turn-statuses">
+            <span class="turn-status ${requested.history ? "is-done" : ""}">História ${requested.history ? "vista" : "pendente"}</span>
+            <span class="turn-status ${requested.physical_exam ? "is-done" : ""}">Exame ${requested.physical_exam ? "visto" : "pendente"}</span>
+            <span class="turn-status ${pendingExams.length ? "is-pending" : receivedResults.length ? "is-done" : ""}">${pendingExams.length ? `${pendingExams.length} resultado(s) a caminho` : receivedResults.length ? `${receivedResults.length} resultado(s) recebido(s)` : "Sem exames pedidos"}</span>
+          </div>
+        </section>
+
         <div class="actions-row">
-          <button class="action-btn" data-act="history"><i>📄</i><span>História Clínica</span></button>
-          <button class="action-btn" data-act="physical_exam"><i>🩺</i><span>Exame Físico</span></button>
-          <button class="action-btn" data-act="diagnosis"><i>✅</i><span>Diagnóstico</span></button>
+          <button class="action-btn ${requested.history ? "is-complete" : ""}" data-act="history"><i>📄</i><span>História Clínica</span></button>
+          <button class="action-btn ${requested.physical_exam ? "is-complete" : ""}" data-act="physical_exam"><i>🩺</i><span>Exame Físico</span></button>
+          <button class="action-btn action-final" data-act="diagnosis"><i>✅</i><span>Encerrar caso</span></button>
         </div>
 
         <div class="actions-row">
@@ -808,6 +844,13 @@ class GameUI {
           <h4>${this.infoTitle}</h4>
           <pre>${this.infoText}</pre>
         </div>
+
+        ${receivedResults.length ? `
+          <section class="results-ledger" aria-label="Resultados recebidos">
+            <h4>Resultados recebidos</h4>
+            ${receivedResults.map(entry => `<button type="button" class="result-item" data-result="${entry.examKey}"><span>${entry.examKey}</span><b>Ver</b></button>`).join("")}
+          </section>
+        ` : ""}
       </div>
     `;
 
@@ -824,6 +867,13 @@ class GameUI {
         else if (act === "med_iv") this.openTreatmentList(engine, p, "iv");
         else if (act === "med_home") this.openTreatmentList(engine, p, "home");
         else if (act === "procedures") this.openTreatmentList(engine, p, "procedures");
+      });
+    });
+
+    this.patientDetails.querySelectorAll("[data-result]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const result = receivedResults.find(entry => entry.examKey === btn.getAttribute("data-result"));
+        if (result) this.showExamResult(result.examKey, result.result);
       });
     });
   }
@@ -858,7 +908,7 @@ class GameUI {
     this.examContent.innerHTML = `
       <div class="overlay-hero" style="background-image:url('${bg}')"></div>
       <h2>${title}</h2>
-      <div class="muted">Escolha qualquer exame. Você pode errar e perder pontos.</div>
+      <div class="muted">Registre o pedido que faz sentido para este cenário. Pedidos repetidos ficam bloqueados.</div>
       <div class="grid-list">
         ${list.map(x => `<button class="grid-item" type="button" data-exam="${x}">${x}</button>`).join("")}
       </div>
@@ -888,7 +938,7 @@ class GameUI {
     this.treatmentContent.innerHTML = `
       <div class="overlay-hero" style="background-image:url('${bg}')"></div>
       <h2>${title}</h2>
-      <div class="muted">Use com estratégia. Algumas escolhas podem piorar o paciente.</div>
+      <div class="muted">As escolhas são avaliadas apenas dentro deste cenário fictício. Ações repetidas ficam bloqueadas.</div>
       <div class="grid-list">
         ${list.map(x => `<button class="grid-item" type="button" data-med="${x}">${x}</button>`).join("")}
       </div>
@@ -910,7 +960,7 @@ class GameUI {
 
     this.diagnosisContent.innerHTML = `
       <h2>Diagnóstico</h2>
-      <div class="muted">Escolha o diagnóstico final para concluir o caso.</div>
+      <div class="muted">Registre a decisão final para encerrar este cenário e receber o debriefing do turno.</div>
 
       <input id="dx-search" class="dx-search" placeholder="Pesquisar diagnóstico..." />
 
@@ -964,31 +1014,36 @@ class GameUI {
     overlay.className = "overlay report-overlay";
     overlay.innerHTML = `
       <div class="overlay-content report-content">
-        <h2>Relatório do Caso</h2>
-        <div class="muted">${patient.name} • ${patient.age} anos • Desfecho: <b class="${outcome === "death" ? "bad" : "ok"}">${outcome === "death" ? "Óbito" : "Alta"}</b></div>
+        <h2>Debriefing do turno</h2>
+        <div class="muted">${patient.name} • ${patient.age} anos • Desfecho do cenário: <b class="${outcome === "death" ? "bad" : "ok"}">${outcome === "death" ? "Encerramento crítico" : "Caso encerrado"}</b></div>
 
         <div class="report-grid">
           <div class="report-card">
             <h3>Diagnóstico</h3>
             <div>${diagCorrect ? `<b class="ok">Correto</b>` : `<b class="bad">Incorreto</b>`}</div>
-            <div class="muted" style="margin-top:6px;">Esperado: ${patient.diagnosis}</div>
+            <div class="muted" style="margin-top:6px;">No cenário: ${patient.diagnosis}</div>
           </div>
           <div class="report-card">
             <h3>Pontuação</h3>
             <div><b>${points}</b></div>
-            <div class="muted" style="margin-top:6px;">Quanto mais rápido e completo, melhor.</div>
+            <div class="muted" style="margin-top:6px;">A pontuação compara suas escolhas com as regras deste cenário.</div>
           </div>
         </div>
 
         <div class="result-box">
-          <h4>Resumo</h4>
+          <h4>O que ficou registrado</h4>
           <pre>${[
+            `Pistas iniciais: ${patient.requested.history ? "história" : "—"}${patient.requested.history && patient.requested.physical_exam ? " + " : ""}${patient.requested.physical_exam ? "exame físico" : ""}`,
+            `Exames pedidos: ${patient.requested.exams.length ? patient.requested.exams.join(", ") : "Nenhum"}`,
+            `Ações registradas: ${patient.requested.meds.length ? patient.requested.meds.join(", ") : "Nenhuma"}`,
             `Exames faltando: ${missingExams.length ? missingExams.join(", ") : "Nenhum"}`,
             `Medicações faltando: ${missingMeds.length ? missingMeds.join(", ") : "Nenhuma"}`,
             `Exames inadequados: ${wrongExams.length ? wrongExams.join(", ") : "Nenhum"}`,
             `Condutas inadequadas: ${wrongMeds.length ? wrongMeds.join(", ") : "Nenhuma"}`
           ].join("\n")}</pre>
         </div>
+
+        <p class="report-disclaimer">Feedback do universo do jogo — não é recomendação para situações reais.</p>
 
         <button class="overlay-back" id="report-close">Continuar</button>
       </div>

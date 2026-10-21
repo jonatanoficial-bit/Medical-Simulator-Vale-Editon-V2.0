@@ -110,3 +110,173 @@ select:focus-visible {
   outline: 3px solid #8fd3ff;
   outline-offset: 3px;
 }
+
+/* Fase 2: torna o caminho do turno legível sem alterar ilustrações,
+   fundos ou avatares já existentes. */
+.turn-guide,
+.results-ledger {
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1px solid rgba(143, 211, 255, 0.26);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(9, 35, 52, 0.76), rgba(8, 18, 30, 0.54));
+}
+
+.turn-guide-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.turn-guide h3,
+.results-ledger h4 {
+  margin: 3px 0 0;
+  font-size: 15px;
+}
+
+.turn-guide p {
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.eyebrow {
+  color: #9bdcff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.turn-progress {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(143, 211, 255, 0.16);
+  color: #d9f3ff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.turn-statuses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.turn-status {
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+}
+
+.turn-status.is-done,
+.action-btn.is-complete {
+  border-color: rgba(106, 220, 162, 0.58);
+  background: rgba(53, 146, 103, 0.17);
+}
+
+.turn-status.is-pending {
+  border-color: rgba(255, 202, 102, 0.58);
+  background: rgba(173, 112, 31, 0.18);
+}
+
+.action-btn.action-final {
+  border-color: rgba(143, 211, 255, 0.48);
+}
+
+.results-ledger {
+  margin-bottom: 0;
+}
+
+.results-ledger h4 {
+  margin-bottom: 10px;
+}
+
+.result-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.11);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.91);
+  cursor: pointer;
+  text-align: left;
+}
+
+.result-item:first-of-type {
+  border-top: 0;
+}
+
+.result-item b {
+  color: #9bdcff;
+  font-size: 12px;
+}
+
+.report-disclaimer {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.63);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 520px) {
+  .turn-guide-header { flex-direction: column; }
+}
+
+/* Continuidade do lugar: o jogador sabe em que área do hospital está.
+   É apenas uma camada de interface sobre os fundos originais. */
+.location-marker {
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+  border: 1px solid rgba(143, 211, 255, 0.24);
+  border-radius: 14px;
+  background: rgba(4, 17, 27, 0.62);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.location-marker-kicker {
+  color: #9bdcff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.location-marker strong {
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 13px;
+}
+
+.location-marker-compact {
+  padding: 6px 9px;
+}
+
+.location-marker-compact strong {
+  font-size: 12px;
+}
+
+/* O botão global não deve disputar área com o HUD do plantão. */
+.top-left {
+  align-items: center;
+}
+
+.top-bar .ghost-btn {
+  width: auto;
+  min-width: 104px;
+  padding: 10px 14px;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .office-header { align-items: stretch; }
+  .location-marker { order: 3; width: 100%; }
+}
