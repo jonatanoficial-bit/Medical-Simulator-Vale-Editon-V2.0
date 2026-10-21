@@ -311,6 +311,23 @@ select:focus-visible {
   flex: 0 0 auto;
 }
 
+/* Controles do turno agrupados para deixar pausa e encerramento claros,
+   sem competir com a leitura do cenário hospitalar. */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-actions .ghost-btn {
+  margin-top: 0;
+}
+
+#finish-shift {
+  border-color: rgba(143, 211, 255, 0.28);
+  color: rgba(255, 255, 255, 0.84);
+}
+
 /* Fase 4: a carreira fica legível sem competir com o avatar ou com os cenários. */
 .career-progress {
   margin-top: 18px;
@@ -361,4 +378,6 @@ select:focus-visible {
 @media (max-width: 720px) {
   .office-header { align-items: stretch; }
   .location-marker { order: 3; width: 100%; }
+  .top-actions { gap: 6px; }
+  .top-bar .ghost-btn { min-width: 0; padding: 10px 11px; }
 }
