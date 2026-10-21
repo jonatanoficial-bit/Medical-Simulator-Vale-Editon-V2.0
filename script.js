@@ -613,6 +613,7 @@ class GameUI {
     this.patientsList = document.getElementById("patients-list");
     this.patientDetails = document.getElementById("patient-details");
     this.pauseBtn = document.getElementById("pause-btn");
+    this.finishShiftBtn = document.getElementById("finish-shift");
 
     // Overlays
     this.examPage = document.getElementById("exam-page");
@@ -672,14 +673,26 @@ class GameUI {
       if (!name){ alert("Por favor, insira seu nome."); return; }
 
       engine.setPlayer(name, this.selectedAvatarIndex);
+      // O perfil volta ao hospital com a trajetória já conquistada, mesmo após
+      // trocar de avatar ou retornar à tela de perfil.
+      const savedLevel = Number(playerProfile?.level) || engine.currentLevel || 1;
+      const savedScore = Math.max(0, Number(playerProfile?.score) || 0);
+      const savedStats = playerProfile?.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
+      engine.currentLevel = savedLevel;
+      engine.totalScore = savedScore;
+      engine.stats = {
+        correct: Number(savedStats.correct) || 0,
+        incorrect: Number(savedStats.incorrect) || 0,
+        deaths: Number(savedStats.deaths) || 0
+      };
 
       playerProfile = {
         name,
         avatar: avatars[this.selectedAvatarIndex].image,
-        role: getRankTitle(engine.currentLevel),
-        level: engine.currentLevel,
-        score: (playerProfile?.score ?? 0),
-        stats: playerProfile?.stats || { correct:0, incorrect:0, deaths:0 }
+        role: getRankTitle(savedLevel),
+        level: savedLevel,
+        score: savedScore,
+        stats: engine.stats
       };
       window.playerProfile = playerProfile;
       savePlayerProfile(playerProfile);
@@ -710,6 +723,16 @@ class GameUI {
     // Pause
     this.pauseBtn.addEventListener("click", () => {
       engine.setPaused(!engine.paused);
+    });
+
+    // Fecha o turno sem apagar a carreira. O jogador retorna ao mesmo espaço
+    // de preparação e pode escolher o próximo caso quando quiser.
+    this.finishShiftBtn.addEventListener("click", () => {
+      engine.stop();
+      this.gameScreen.classList.remove("active");
+      this.updateOffice(engine);
+      this.officeScreen.classList.add("active");
+      this.toast("Plantão encerrado. Sua trajetória foi mantida.");
     });
 
     // Overlay back
