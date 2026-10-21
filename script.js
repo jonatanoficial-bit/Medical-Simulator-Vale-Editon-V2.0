@@ -53,6 +53,27 @@ function getRankTitle(level){
   return "Médico Sênior";
 }
 
+function getCareerProgress(totalScore, level){
+  const score = Math.max(0, Number(totalScore) || 0);
+  const stages = {
+    1: { floor:0, next:301, nextTitle:"Plant. Júnior" },
+    2: { floor:301, next:801, nextTitle:"Plantonista" },
+    3: { floor:801, next:1501, nextTitle:"Médico Sênior" },
+    4: { floor:1501, next:null, nextTitle:null }
+  };
+  const stage = stages[Math.min(4, Math.max(1, level || 1))] || stages[1];
+  if (!stage.next) return { percent:100, label:"Cargo máximo alcançado", detail:"Sua trajetória no Hospital Vale chegou ao nível máximo." };
+
+  const span = stage.next - stage.floor;
+  const earned = clamp(score - stage.floor, 0, span);
+  const remaining = Math.max(0, stage.next - score);
+  return {
+    percent: Math.round((earned / span) * 100),
+    label: `Próximo cargo: ${stage.nextTitle}`,
+    detail: `${remaining} ponto${remaining === 1 ? "" : "s"} para evoluir.`
+  };
+}
+
 function formatVitals(v){
   const dia = Math.max(40, Math.round(v.sys*0.55));
   return `PA: ${v.sys}/${dia} mmHg\nFC: ${v.hr} bpm\nFR: ${v.rr} irpm\nSatO2: ${v.spo2}%\nTemp: ${v.temp} °C`;
@@ -238,6 +259,13 @@ class GameEngine {
     if (playerProfile && typeof playerProfile.score === "number") this.totalScore = playerProfile.score;
 
     this.currentLevel = playerProfile?.level || this.config.initialLevel;
+    if (playerProfile?.stats){
+      this.stats = {
+        correct: Number(playerProfile.stats.correct) || 0,
+        incorrect: Number(playerProfile.stats.incorrect) || 0,
+        deaths: Number(playerProfile.stats.deaths) || 0
+      };
+    }
 
     this.ui.updateLevel(this.currentLevel);
     this.ui.updateScore(this.score);
@@ -500,6 +528,7 @@ class GameEngine {
     this.casesAttended += 1;
     if (diagCorrect) this.stats.correct += 1; else this.stats.incorrect += 1;
 
+    const levelBefore = this.currentLevel;
     this.score += points;
     this.totalScore += points;
 
@@ -524,7 +553,8 @@ class GameEngine {
 
     // relatório
     this.ui.showCaseReport({
-      patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome
+      patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome,
+      career:getCareerProgress(this.totalScore, this.currentLevel), promoted:this.currentLevel > levelBefore
     });
 
     // remove e seleciona próximo
@@ -570,6 +600,9 @@ class GameUI {
     this.statCorrect = document.getElementById("stat-correct");
     this.statIncorrect = document.getElementById("stat-incorrect");
     this.statDeaths = document.getElementById("stat-deaths");
+    this.careerProgressFill = document.getElementById("career-progress-fill");
+    this.careerProgressLabel = document.getElementById("career-progress-label");
+    this.careerProgressDetail = document.getElementById("career-progress-detail");
 
     this.specialtySelect = document.getElementById("specialty-select");
     this.modeSelect = document.getElementById("mode-select");
@@ -724,6 +757,11 @@ class GameUI {
     const role = prof.role || getRankTitle(lvl);
     this.officeLevel.textContent = `${role} • Nível ${lvl}`;
     this.officeScore.textContent = String(prof.score ?? 0);
+
+    const career = getCareerProgress(prof.score ?? engine.totalScore, lvl);
+    if (this.careerProgressFill) this.careerProgressFill.style.width = `${career.percent}%`;
+    if (this.careerProgressLabel) this.careerProgressLabel.textContent = career.label;
+    if (this.careerProgressDetail) this.careerProgressDetail.textContent = career.detail;
 
     const stats = prof.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
     const total = (stats.correct||0) + (stats.incorrect||0);
@@ -1055,7 +1093,7 @@ class GameUI {
     // remove anterior
     if (this.reportOverlay) this.reportOverlay.remove();
 
-    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome } = r;
+    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome, career, promoted } = r;
 
     const overlay = document.createElement("div");
     overlay.className = "overlay report-overlay";
@@ -1074,6 +1112,11 @@ class GameUI {
             <h3>Pontuação</h3>
             <div><b>${points}</b></div>
             <div class="muted" style="margin-top:6px;">A pontuação compara suas escolhas com as regras deste cenário.</div>
+          </div>
+          <div class="report-card career-report-card">
+            <h3>${promoted ? "Promoção desbloqueada" : "Trajetória"}</h3>
+            <div><b class="${promoted ? "ok" : ""}">${promoted ? "Novo cargo no Hospital Vale" : career.label}</b></div>
+            <div class="muted" style="margin-top:6px;">${promoted ? "Seu desempenho elevou seu nível nesta jornada fictícia." : career.detail}</div>
           </div>
         </div>
 
