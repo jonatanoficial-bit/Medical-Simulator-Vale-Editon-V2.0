@@ -111,6 +111,22 @@ html, body {
   z-index: 1;
 }
 
+/* A tela base é flex; sem esta direção, cabeçalho e painel do escritório
+   competiam horizontalmente e o conteúdo adicional podia ficar fora da área
+   visível. O escritório agora tem a leitura natural de um prontuário: topo,
+   decisões do turno e jornada de carreira. */
+#office-screen {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+}
+
+#office-screen .office-header,
+#office-screen .office-body {
+  flex: 0 0 auto;
+}
+
 .lobby-location {
   width: fit-content;
   margin: 0 0 16px;
@@ -596,6 +612,10 @@ select:focus-visible {
 @media (max-width: 620px) {
   .academy-steps { grid-template-columns: 1fr; }
   .academy-step { min-height: 128px; }
+}
+
+@media (max-height: 760px) {
+  #office-screen { justify-content: flex-start; }
 }
 
 @media (max-width: 720px) {
