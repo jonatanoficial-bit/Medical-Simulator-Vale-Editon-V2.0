@@ -12,7 +12,7 @@
     "initialSeverity": 0.35,
     "requiredExams": ["Hemograma", "PCR", "TC abdome/pelve"],
     "harmfulExams": ["RM crânio", "AngioTC de tórax"],
-    "requiredMeds": ["Dipirona IV", "SF 0,9% 500 mL", "Acesso venoso periférico"],
+    "requiredMeds": ["Dipirona IV", "Solução salina isotônica IV", "Acesso venoso periférico"],
     "harmfulMeds": ["Heparina IV", "Noradrenalina (vasopressor)"],
     "examResults": {
       "Hemograma": "Leucócitos 15.800 (neutrofilia). Hb 14.2. Plaquetas 280k.",
@@ -20,7 +20,7 @@
       "TC abdome/pelve": "Apendice espessado com densificação de gordura periappendicular. Sem abscesso."
     },
     "medEffects": {
-      "SF 0,9% 500 mL": { "severityDelta": -0.06, "delaySeconds": 6 },
+      "Solução salina isotônica IV": { "severityDelta": -0.06, "delaySeconds": 6 },
       "Dipirona IV": { "severityDelta": -0.05, "delaySeconds": 5 }
     }
   },
@@ -38,7 +38,7 @@
     "requiredExams": ["ECG 12 derivações", "D-dímero", "AngioTC de tórax"],
     "harmfulExams": ["TC abdome/pelve", "RM coluna"],
     "requiredMeds": ["Oxigênio por máscara", "Heparina IV", "Monitorização contínua"],
-    "harmfulMeds": ["SF 0,9% 1000 mL", "Noradrenalina (vasopressor)"],
+    "harmfulMeds": ["Solução salina isotônica IV", "Noradrenalina (vasopressor)"],
     "examResults": {
       "ECG 12 derivações": "Taquicardia sinusal. S1Q3T3 discreto.",
       "D-dímero": "D-dímero 3.200 ng/mL (elevado).",

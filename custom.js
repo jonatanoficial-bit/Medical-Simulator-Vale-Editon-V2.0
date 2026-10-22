@@ -7,7 +7,8 @@
 (() => {
   "use strict";
 
-  const tutorialStorageKey = "medsim_tutorialCompleted_v3";
+  // Nova Academia: quem já viu o aviso antigo recebe o curso rápido uma vez.
+  const tutorialStorageKey = "medsim_academyCompleted_v4";
 
   window.addEventListener("DOMContentLoaded", () => {
     const logoScreen = document.getElementById("logo-screen");

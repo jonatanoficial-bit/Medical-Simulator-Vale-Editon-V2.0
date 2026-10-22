@@ -430,6 +430,174 @@ select:focus-visible {
   border-color: rgba(143, 211, 255, 0.26);
 }
 
+/* Fase 7: a Academia usa as imagens já existentes como ambientação. Nenhum
+   arquivo de arte é substituído, recortado ou regravado. */
+.mode-explainer {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(143, 211, 255, 0.20);
+  border-radius: 14px;
+  background: rgba(6, 21, 32, 0.46);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+  line-height: 1.42;
+}
+
+.residency-brief {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  position: relative;
+}
+
+.residency-brief::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.17;
+  background: linear-gradient(90deg, rgba(4, 17, 27, 0.95), rgba(4, 17, 27, 0.40)), url("images/bg_hospital_01.jpg") center / cover no-repeat;
+}
+
+.residency-brief > * {
+  position: relative;
+  z-index: 1;
+}
+
+.chapter-kicker {
+  display: block;
+  margin-bottom: 7px;
+  color: #9bdcff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.residency-brief p {
+  max-width: 790px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.83);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.residency-brief .muted { margin-top: 12px; color: rgba(255, 255, 255, 0.65); }
+
+.career-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 15px 0 0;
+}
+
+.career-path span {
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(3, 13, 21, 0.42);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.career-path .career-path-current {
+  border-color: rgba(143, 211, 255, 0.50);
+  background: rgba(85, 170, 220, 0.20);
+  color: #e5f7ff;
+}
+
+.academy-content { max-width: 840px; }
+
+.academy-hero {
+  display: flex;
+  align-items: end;
+  min-height: 150px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba(143, 211, 255, 0.25);
+  border-radius: 20px;
+  background: linear-gradient(0deg, rgba(3, 12, 20, 0.86), rgba(3, 12, 20, 0.08)), url("images/hospital_corridor.png") center / cover no-repeat;
+}
+
+.academy-hero span {
+  color: #d8f4ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.academy-content h2 { margin: 0; }
+
+.academy-lead {
+  margin: 8px 0 16px;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.5;
+}
+
+.academy-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.academy-step {
+  position: relative;
+  isolation: isolate;
+  min-height: 155px;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid rgba(143, 211, 255, 0.20);
+  border-radius: 18px;
+  background: rgba(3, 15, 24, 0.78);
+}
+
+.academy-step::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.22;
+  background-position: center;
+  background-size: cover;
+}
+
+.academy-step-arrival::before { background-image: url("images/hospital_corridor.png"); }
+.academy-step-investigate::before { background-image: url("images/labs.png"); }
+.academy-step-act::before { background-image: url("images/xray.jpg"); }
+.academy-step-debrief::before { background-image: url("images/bg_hospital_02.jpg"); }
+
+.academy-step-number {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #9bdcff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.academy-step h3 { margin: 0 0 6px; font-size: 15px; }
+.academy-step p { margin: 0; color: rgba(255, 255, 255, 0.78); font-size: 12px; line-height: 1.42; }
+
+.academy-reference {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid rgba(143, 211, 255, 0.75);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.academy-reference a { color: #bceaff; }
+
+@media (max-width: 620px) {
+  .academy-steps { grid-template-columns: 1fr; }
+  .academy-step { min-height: 128px; }
+}
+
 @media (max-width: 720px) {
   .office-header { align-items: stretch; }
   .location-marker { order: 3; width: 100%; }

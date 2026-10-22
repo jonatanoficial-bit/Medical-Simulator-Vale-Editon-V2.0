@@ -102,6 +102,7 @@
             </select>
           </div>
         </div>
+        <p id="mode-explainer" class="mode-explainer" aria-live="polite">Treinamento guiado: você terá tempo ampliado para observar o caso, pedir retornos e revisar a decisão.</p>
         <button id="next-case-button" class="primary-btn">Próximo caso</button>
         <button id="back-office" class="ghost-btn" style="margin-top:10px;">Voltar (trocar perfil)</button>
       </div>
@@ -121,6 +122,18 @@
           </div>
           <div class="career-progress-track" aria-hidden="true"><span id="career-progress-fill"></span></div>
         </div>
+      </div>
+      <div class="office-card residency-brief">
+        <span class="chapter-kicker">CAPÍTULO 1 · CHEGADA AO HOSPITAL VALE</span>
+        <h3>O primeiro plantão</h3>
+        <p>Você acabou de assumir como residente. A diretoria acompanha cada turno: construa reputação, desbloqueie responsabilidades e deixe sua marca no hospital.</p>
+        <div class="career-path" aria-label="Jornada de carreira planejada">
+          <span class="career-path-current">Residente</span>
+          <span>Plantonista</span>
+          <span>Especialista</span>
+          <span>Chefia</span>
+        </div>
+        <p class="muted">A Academia abre sua jornada; promoções, confiança da equipe e riscos de rebaixamento entram no próximo capítulo da carreira.</p>
       </div>
     </div>
   </section>
@@ -177,14 +190,34 @@
   </div>
 
   <!-- OVERLAY DE TUTORIAL -->
-  <!-- Essa tela é exibida na primeira vez que o jogador inicia o jogo. Ela explica de forma didática como jogar. -->
+  <!-- Essa tela é exibida na primeira vez que o jogador inicia o jogo. Ela explica o fluxo de jogo e as referências educacionais. -->
   <div id="tutorial-page" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
-    <div class="overlay-content">
-      <h2 id="tutorial-title">Antes do primeiro turno</h2>
-      <p>Este jogo apresenta cenários fictícios de tomada de decisão. Leia a situação, descubra pistas e escolha um caminho dentro das regras do turno.</p>
-      <p>O feedback explica as consequências no universo do jogo; ele não é protocolo, prescrição ou recomendação aplicável fora da experiência.</p>
-      <p>O modo <em>Treinamento</em> oferece mais tempo para observar. No modo <em>Plantão</em>, o mesmo cenário pede decisões mais rápidas.</p>
-      <button id="tutorial-close" class="primary-btn">Entendi, iniciar turno</button>
+    <div class="overlay-content academy-content">
+      <div class="academy-hero" aria-hidden="true">
+        <span>ACADEMIA DO RESIDENTE · MÓDULO 01</span>
+      </div>
+      <h2 id="tutorial-title">Seu primeiro turno começa aqui</h2>
+      <p class="academy-lead">Antes de assumir a baia, conheça o ciclo que guia a experiência: priorizar, investigar, agir no cenário e aprender no debriefing.</p>
+      <ol class="academy-steps">
+        <li class="academy-step academy-step-arrival">
+          <span class="academy-step-number">01</span>
+          <div><h3>Avalie e priorize</h3><p>A Academia usa a sequência ABCDE como estrutura educacional para a avaliação inicial de cenários agudos. Comece pelas pistas disponíveis no caso.</p></div>
+        </li>
+        <li class="academy-step academy-step-investigate">
+          <span class="academy-step-number">02</span>
+          <div><h3>Investigue o cenário</h3><p>História, exame, monitorização e exames retornam no tempo do jogo. Leia cada resultado antes de abrir novas possibilidades.</p></div>
+        </li>
+        <li class="academy-step academy-step-act">
+          <span class="academy-step-number">03</span>
+          <div><h3>Proceda e reavalie</h3><p>Escolha somente procedimentos ou terapias liberados pelo caso e observe a resposta do cenário. Esta versão não usa dosagens.</p></div>
+        </li>
+        <li class="academy-step academy-step-debrief">
+          <span class="academy-step-number">04</span>
+          <div><h3>Feche e aprenda</h3><p>O debriefing compara sua rota com a rota do cenário, registra pontos e prepara o próximo capítulo da sua carreira.</p></div>
+        </li>
+      </ol>
+      <p class="academy-reference">Base educacional: abordagem ABCDE do <a href="https://www.who.int/publications-detail-redirect/9789241513081" target="_blank" rel="noopener noreferrer">Basic Emergency Care (OMS/ICRC)</a>. Em situações reais, siga protocolos locais atualizados e supervisão habilitada; o jogo não substitui formação clínica.</p>
+      <button id="tutorial-close" class="primary-btn">Entrar no primeiro caso</button>
     </div>
   </div>
 
