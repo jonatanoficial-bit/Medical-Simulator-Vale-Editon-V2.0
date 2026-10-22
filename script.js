@@ -109,7 +109,7 @@ function defaultCasesFallback(){
       initialSeverity:0.35,
       requiredExams:["Hemograma","PCR","TC abdome/pelve"],
       harmfulExams:["RM crânio"],
-      requiredMeds:["Dipirona IV","SF 0,9% 500 mL","Acesso venoso periférico"],
+      requiredMeds:["Dipirona IV","Solução salina isotônica IV","Acesso venoso periférico"],
       harmfulMeds:["Heparina IV"],
       examResults:{
         "Hemograma":"Leucócitos 15.800 (neutrofilia).",
@@ -117,7 +117,7 @@ function defaultCasesFallback(){
         "TC abdome/pelve":"Apêndice espessado com densificação periappendicular."
       },
       medEffects:{
-        "SF 0,9% 500 mL": { "severityDelta": -0.06, "delaySeconds": 6 },
+        "Solução salina isotônica IV": { "severityDelta": -0.06, "delaySeconds": 6 },
         "Dipirona IV": { "severityDelta": -0.05, "delaySeconds": 5 }
       }
     }
@@ -132,7 +132,7 @@ function defaultCatalogFallback(){
       others:["ECG 12 derivações","Monitorização contínua","Glicemia capilar"]
     },
     treatments:{
-      iv:["SF 0,9% 500 mL","Dipirona IV","Ondansetrona IV","Ceftriaxona IV","Naloxona IV","Heparina IV"],
+      iv:["Solução salina isotônica IV","Dipirona IV","Ondansetrona IV","Ceftriaxona IV","Naloxona IV","Heparina IV"],
       home:["Dipirona VO","Paracetamol VO","Azitromicina VO","Omeprazol VO"],
       procedures:["Oxigênio por máscara","Acesso venoso periférico","Monitorização contínua"]
     },
@@ -189,8 +189,13 @@ class GameEngine {
       initialLevel: 1,
       baseNewPatientIntervalMs: 16000,
       tickMs: 1000,
-      training: { deteriorationMultiplier: 0.45, penaltyMultiplier: 0.35 },
-      shift: { deteriorationMultiplier: 1.0, penaltyMultiplier: 1.0 }
+      training: {
+        deteriorationMultiplier: 0.18,
+        penaltyMultiplier: 0.20,
+        deathAfterSeconds: 240,
+        outcomeSafetyWindowSeconds: 240
+      },
+      shift: { deteriorationMultiplier: 1.0, penaltyMultiplier: 1.0, deathAfterSeconds: 75 }
     };
 
     this.mode = "shift";
@@ -324,8 +329,13 @@ class GameEngine {
 
       this.applyQueuedEffects(p);
 
-      // morte: exige severidade alta E tempo
-      if (p.severity >= 0.99 && p.time > 75){
+      // No treinamento o caso permanece disponível por quatro minutos antes
+      // de um desfecho terminal automático. Assim, o jogador pode observar,
+      // investigar e rever a decisão sem uma punição imediata.
+      const deathAfterSeconds = this.mode === "training"
+        ? this.config.training.deathAfterSeconds
+        : this.config.shift.deathAfterSeconds;
+      if (p.severity >= 0.99 && p.time > deathAfterSeconds){
         p.status = "dead";
         this.stats.deaths += 1;
         this.ui.onPatientDied(p);
@@ -514,7 +524,9 @@ class GameEngine {
     points -= timePenalty * 2 * penaltyMult;
 
     let outcome = "stable";
-    if (!diagCorrect && (wrongMeds.length > 0 || missingMeds.length > 1) && patient.severity > 0.92) outcome = "death";
+    const canHaveTerminalOutcome = this.mode !== "training"
+      || patient.time > this.config.training.outcomeSafetyWindowSeconds;
+    if (canHaveTerminalOutcome && !diagCorrect && (wrongMeds.length > 0 || missingMeds.length > 1) && patient.severity > 0.92) outcome = "death";
     else if (diagCorrect && missingMeds.length === 0) outcome = "improved";
 
     if (outcome === "death"){
@@ -606,6 +618,7 @@ class GameUI {
 
     this.specialtySelect = document.getElementById("specialty-select");
     this.modeSelect = document.getElementById("mode-select");
+    this.modeExplainer = document.getElementById("mode-explainer");
 
     // Game UI
     this.levelDisplay = document.getElementById("level-display");
@@ -713,6 +726,8 @@ class GameUI {
       engine.start();
     });
 
+    this.modeSelect.addEventListener("change", () => this.updateModeExplainer());
+
     // Back office
     document.getElementById("back-office").addEventListener("click", () => {
       engine.stop();
@@ -742,7 +757,16 @@ class GameUI {
 
     // inicializa selects de especialidade após loadData
     fillSpecialties(engine.cases, this.specialtySelect);
+    this.updateModeExplainer();
     this.updateOffice(engine);
+  }
+
+  updateModeExplainer(){
+    if (!this.modeExplainer) return;
+    const isTraining = this.modeSelect?.value === "training";
+    this.modeExplainer.textContent = isTraining
+      ? "Treinamento guiado: quatro minutos de janela segura para observar, investigar e revisar o cenário antes de um desfecho terminal automático."
+      : "Plantão sob pressão: ritmo normal do hospital e consequências de tempo mais exigentes. Use a Academia antes de buscar a maior pontuação.";
   }
 
   setPausedUI(isPaused){

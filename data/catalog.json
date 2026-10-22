@@ -52,7 +52,6 @@
     ],
     "others": [
       "ECG 12 derivações",
-      "Monitorização contínua",
       "Oximetria contínua",
       "Glicemia capilar",
       "POCUS (ultrassom à beira-leito)",
@@ -64,9 +63,8 @@
   },
   "treatments": {
     "iv": [
-      "SF 0,9% 500 mL",
-      "SF 0,9% 1000 mL",
-      "Ringer Lactato 1000 mL",
+      "Solução salina isotônica IV",
+      "Ringer lactato IV",
       "Dipirona IV",
       "Morfina IV",
       "Ondansetrona IV",
@@ -97,6 +95,7 @@
       "Oxigênio por máscara",
       "Nebulização com broncodilatador",
       "Acesso venoso periférico",
+      "Monitorização contínua",
       "Sonda vesical de demora",
       "Sutura",
       "Imobilização",
