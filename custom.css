@@ -441,6 +441,51 @@ select:focus-visible {
   transition: width 0.45s ease;
 }
 
+/* Fases 8 e 9: reputação, revisão de carreira e personagens transformam o
+   painel em uma trajetória, sem encobrir os cenários visuais do hospital. */
+.career-standing {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.career-standing-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12px;
+}
+
+.career-standing-topline strong { color: #d9f3ff; font-size: 13px; }
+
+.career-standing-track {
+  height: 7px;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(143, 211, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.career-standing-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #638fd5, #86e0d5);
+  box-shadow: 0 0 14px rgba(134, 224, 213, 0.42);
+  transition: width 0.45s ease;
+}
+
+#career-reputation-detail {
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 11px;
+  line-height: 1.42;
+}
+
 .career-report-card {
   grid-column: 1 / -1;
   border-color: rgba(143, 211, 255, 0.26);
@@ -498,6 +543,30 @@ select:focus-visible {
 
 .residency-brief .muted { margin-top: 12px; color: rgba(255, 255, 255, 0.65); }
 
+.story-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin-top: 14px;
+  padding: 8px 10px 8px 8px;
+  border: 1px solid rgba(143, 211, 255, 0.20);
+  border-radius: 16px;
+  background: rgba(3, 13, 21, 0.44);
+}
+
+.story-contact img {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(143, 211, 255, 0.38);
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.story-contact div { display: grid; gap: 2px; }
+.story-contact strong { color: rgba(255, 255, 255, 0.95); font-size: 12px; }
+.story-contact span { color: #9bdcff; font-size: 10px; font-weight: 700; }
+
 .career-path {
   display: flex;
   flex-wrap: wrap;
@@ -519,6 +588,11 @@ select:focus-visible {
   border-color: rgba(143, 211, 255, 0.50);
   background: rgba(85, 170, 220, 0.20);
   color: #e5f7ff;
+}
+
+.career-path .career-path-complete {
+  border-color: rgba(134, 224, 213, 0.36);
+  color: rgba(211, 255, 248, 0.86);
 }
 
 .academy-content { max-width: 840px; }
