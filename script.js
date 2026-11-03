@@ -63,6 +63,35 @@ const avatars = [
   { name:"Avatar 6", image:"images/avatar6.png" }
 ];
 
+// Fase 13: o jogo antecipa somente imagens que já existem no projeto. O
+// carregamento é ocioso e nunca bloqueia a entrada no Hospital Vale, para que
+// cenários e avatares apareçam prontos sem criar dependências externas.
+const CORE_HOSPITAL_ASSETS = [
+  "images/vale_games_logo.jpg",
+  "images/bg_hospital_01.jpg",
+  "images/bg_hospital_02.jpg",
+  "images/hospital_corridor.png",
+  "images/labs.png",
+  "images/xray.jpg",
+  "images/patient_female.png",
+  "images/patient_male.png",
+  ...avatars.map(avatar => avatar.image)
+];
+
+function preloadHospitalAssets(){
+  CORE_HOSPITAL_ASSETS.forEach((source) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = source;
+  });
+}
+
+function scheduleHospitalAssetPreload(){
+  const run = () => window.setTimeout(preloadHospitalAssets, 0);
+  if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(run, { timeout:1600 });
+  else window.setTimeout(run, 700);
+}
+
 function randomName(gender){
   const male = ["João Ferreira","Bruno Rocha","Eduardo Reis","Marcos Lima","Rafael Souza","Lucas Almeida"];
   const female = ["Maria Oliveira","Ana Martins","Juliana Costa","Beatriz Rocha","Carla Souza","Fernanda Lima"];
@@ -1056,6 +1085,7 @@ class GameUI {
 
   init(engine){
     this.applyAccessibilitySettings();
+    scheduleHospitalAssetPreload();
 
     // Toque na capa -> welcome
     const goWelcome = () => {
@@ -1194,6 +1224,16 @@ class GameUI {
     });
     this.immersiveButton?.addEventListener("click", () => this.toggleImmersiveMode());
     document.addEventListener("fullscreenchange", () => this.updateImmersiveButton());
+    // O plantão não continua consumindo tempo quando o jogador troca de aba
+    // para estudar uma referência ou atender uma interrupção. A volta sempre
+    // fica sob controle do jogador, pelo botão "Continuar".
+    document.addEventListener("visibilitychange", () => {
+      const gameIsVisible = this.gameScreen?.classList.contains("active");
+      if (document.hidden && gameIsVisible && !engine.paused){
+        engine.setPaused(true);
+        this.toast("Plantão pausado enquanto esta tela ficou em segundo plano.");
+      }
+    });
 
     // inicializa selects de especialidade após loadData
     fillSpecialties(engine.cases, this.specialtySelect);
