@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Simulador Médico (Atualizado)</title>
   <!-- Motor visual local. Os fundos e avatares continuam carregados da pasta images deste projeto. -->
-  <link rel="stylesheet" href="./style.css?v=20261103-f1011" />
+  <link rel="stylesheet" href="./style.css?v=20261103-f12a" />
   <!-- Folha de estilo personalizada para ajustes de layout e elementos adicionais (logo inicial) -->
-  <link rel="stylesheet" href="./custom.css?v=20261103-f1011" />
+  <link rel="stylesheet" href="./custom.css?v=20261103-f12a" />
 </head>
 <body>
 
@@ -91,6 +91,7 @@
         <button type="button" class="office-tab" data-office-view-button="story" aria-pressed="false">História</button>
       </div>
       <button id="immersive-button" type="button" class="immersive-button" aria-pressed="false">Modo imersivo</button>
+      <button id="accessibility-button" type="button" class="accessibility-button">Ajustes</button>
     </div>
     <div id="office-body" class="office-body" data-active-view="command">
       <div class="office-card" data-office-view="command">
@@ -290,10 +291,52 @@
     </div>
   </div>
 
+  <!-- Fase 12: conforto de leitura e sinais de interface. Preferências ficam
+       neste navegador e não alteram nenhuma arte ou regra dos casos. -->
+  <div id="accessibility-page" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="accessibility-title">
+    <div class="overlay-content accessibility-content">
+      <div class="accessibility-hero" aria-hidden="true"><span>HOSPITAL VALE · AJUSTES DE PLANTÃO</span></div>
+      <span class="chapter-kicker">FASE 12 · CONFORTO E IMERSÃO</span>
+      <h2 id="accessibility-title">Ajustes de plantão</h2>
+      <p class="accessibility-lead">Deixe a interface mais confortável sem mudar os cenários, os avatares ou a sua carreira. Os sinais sonoros são apenas feedback do jogo — nunca são alertas clínicos.</p>
+      <div class="accessibility-grid">
+        <section class="accessibility-card">
+          <span>CONFORTO VISUAL</span>
+          <h3>Movimento reduzido</h3>
+          <p>Reduz transições e animações para uma leitura mais estável.</p>
+          <button id="reduced-motion-toggle" type="button" class="setting-toggle" aria-pressed="false">Desligado</button>
+        </section>
+        <section class="accessibility-card">
+          <span>LEITURA</span>
+          <h3>Contraste reforçado</h3>
+          <p>Fortalece texto e contornos dos painéis, mantendo a ambientação do hospital.</p>
+          <button id="high-contrast-toggle" type="button" class="setting-toggle" aria-pressed="false">Desligado</button>
+        </section>
+        <section class="accessibility-card accessibility-card-wide">
+          <span>LEITURA</span>
+          <h3>Tamanho do texto</h3>
+          <p>Escolha a escala mais confortável para a sua tela.</p>
+          <div class="text-scale-options" aria-label="Tamanho do texto">
+            <button type="button" class="text-scale-button is-active" data-text-scale="regular" aria-pressed="true">Padrão</button>
+            <button type="button" class="text-scale-button" data-text-scale="large" aria-pressed="false">Ampliado</button>
+          </div>
+        </section>
+        <section class="accessibility-card accessibility-card-wide">
+          <span>ÁUDIO</span>
+          <h3>Sinais de interface</h3>
+          <p>Toques sutis para navegar, iniciar e concluir telas do jogo. Pode ser desligado a qualquer momento.</p>
+          <button id="sound-effects-toggle" type="button" class="setting-toggle" aria-pressed="false">Desligado</button>
+        </section>
+      </div>
+      <p id="accessibility-status" class="accessibility-status" role="status" aria-live="polite">Ajustes no padrão do Hospital Vale.</p>
+      <button id="accessibility-back" type="button" class="overlay-back">Voltar à central</button>
+    </div>
+  </div>
+
   <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
 
   <!-- Carrega o motor local e, em seguida, melhorias de interface sem alterar a engine em runtime. -->
-  <script src="./script.js?v=20261103-f1011" defer></script>
-  <script src="./custom.js?v=20261103-f1011" defer></script>
+  <script src="./script.js?v=20261103-f12a" defer></script>
+  <script src="./custom.js?v=20261103-f12a" defer></script>
 </body>
 </html>
