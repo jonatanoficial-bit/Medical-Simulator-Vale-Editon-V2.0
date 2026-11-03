@@ -46,32 +46,247 @@ function randomName(gender){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-function getRankTitle(level){
-  if (level <= 1) return "Residente";
-  if (level === 2) return "Plant. Júnior";
-  if (level === 3) return "Plantonista";
-  return "Médico Sênior";
+// Fases 8 e 9: a carreira não é mais só uma barra de pontos. Ela combina
+// experiência, reputação no Hospital Vale e uma história que muda de capítulo
+// quando o jogador assume novas responsabilidades.
+const CAREER_STAGES = [
+  { level:1, title:"Residente", floor:0, nextScore:300, nextReputation:45, nextTitle:"Residente Sênior" },
+  { level:2, title:"Residente Sênior", floor:300, nextScore:800, nextReputation:50, nextTitle:"Plantonista Júnior" },
+  { level:3, title:"Plantonista Júnior", floor:800, nextScore:1500, nextReputation:56, nextTitle:"Plantonista" },
+  { level:4, title:"Plantonista", floor:1500, nextScore:2400, nextReputation:62, nextTitle:"Especialista" },
+  { level:5, title:"Especialista", floor:2400, nextScore:3600, nextReputation:68, nextTitle:"Coordenador(a) Clínico(a)" },
+  { level:6, title:"Coordenador(a) Clínico(a)", floor:3600, nextScore:5200, nextReputation:75, nextTitle:"Diretor(a) do Hospital" },
+  { level:7, title:"Diretor(a) do Hospital", floor:5200, nextScore:null, nextReputation:null, nextTitle:null }
+];
+
+const STORY_CHAPTERS = {
+  1: {
+    kicker:"CAPÍTULO 1 · PRIMEIRO PLANTÃO",
+    title:"A porta de entrada",
+    mentor:"Dra. Helena Azevedo",
+    role:"Preceptora do Hospital Vale",
+    avatar:"images/avatar2.png",
+    opening:"Você chega como residente em seu primeiro plantão. A Dra. Helena acompanha seus registros e quer ver como você escuta, investiga e aprende com cada cenário.",
+    rising:"A equipe já reconhece seu cuidado com os detalhes. Continue construindo confiança — a próxima avaliação pode mudar o rumo da sua residência.",
+    ready:"Sua primeira rotação ganhou consistência. A preceptora vai encaminhar sua evolução para a comissão de residência."
+  },
+  2: {
+    kicker:"CAPÍTULO 2 · CONFIANÇA EM CONSTRUÇÃO",
+    title:"Entre pares",
+    mentor:"Dr. Caio Menezes",
+    role:"Plantonista de referência",
+    avatar:"images/avatar4.png",
+    opening:"Como residente sênior, você passa a ser procurado por quem acabou de chegar. A confiança da equipe agora vale tanto quanto a sua pontuação.",
+    rising:"Caio começa a delegar decisões de fluxo para você. Cada turno bem conduzido fortalece sua voz dentro da equipe.",
+    ready:"A equipe quer saber se você está pronto para assumir um plantão com mais autonomia."
+  },
+  3: {
+    kicker:"CAPÍTULO 3 · A VOZ DA EQUIPE",
+    title:"Seu primeiro plantão",
+    mentor:"Enf. Marina Lopes",
+    role:"Liderança assistencial",
+    avatar:"images/avatar5.png",
+    opening:"Agora como plantonista júnior, você deixa de apenas acompanhar o ritmo: sua organização muda o clima da ala.",
+    rising:"Marina observa como você responde à pressão e como trata cada debriefing como uma chance de crescer.",
+    ready:"A equipe reconhece sua constância. Um plantão completo sob sua responsabilidade está cada vez mais perto."
+  },
+  4: {
+    kicker:"CAPÍTULO 4 · DECISÕES DE PLANTÃO",
+    title:"Quem segura a ala",
+    mentor:"Dr. Rafael Torres",
+    role:"Coordenador de plantão",
+    avatar:"images/avatar1.png",
+    opening:"Você assumiu o plantão. A diretoria não espera perfeição: espera presença, clareza e capacidade de aprender quando algo não sai como planejado.",
+    rising:"Rafael confia em você para manter a equipe centrada. Sua reputação passa a ser parte da história do Hospital Vale.",
+    ready:"Seu desempenho sustentado abriu a porta para uma atuação de especialista."
+  },
+  5: {
+    kicker:"CAPÍTULO 5 · RESPONSABILIDADE COMPARTILHADA",
+    title:"O olhar de especialista",
+    mentor:"Dra. Helena Azevedo",
+    role:"Diretora clínica",
+    avatar:"images/avatar2.png",
+    opening:"Como especialista, você ganha a responsabilidade de transformar experiência em segurança para toda a equipe.",
+    rising:"Helena vê que você não joga para aparecer: você constrói uma cultura de revisão e aprendizado.",
+    ready:"A diretoria está discutindo quem poderá coordenar a próxima ala do Hospital Vale."
+  },
+  6: {
+    kicker:"CAPÍTULO 6 · A ALA SOB SUA GUARDA",
+    title:"Coordenar é cuidar da equipe",
+    mentor:"Conselho do Hospital Vale",
+    role:"Comissão de direção",
+    avatar:"images/avatar3.png",
+    opening:"Você coordena pessoas, horários e expectativas. A avaliação agora mede a confiança que sua equipe deposita em você.",
+    rising:"O conselho acompanha sua trajetória. Seus registros mostram uma liderança que cresce sem esquecer de onde começou.",
+    ready:"O cargo máximo está próximo: o Hospital Vale precisa de alguém que conheça cada etapa da jornada."
+  },
+  7: {
+    kicker:"CAPÍTULO 7 · O LEGADO DO HOSPITAL VALE",
+    title:"Direção conquistada",
+    mentor:"Equipe do Hospital Vale",
+    role:"Sua nova equipe",
+    avatar:"images/avatar6.png",
+    opening:"Você chegou à direção do Hospital Vale. A carreira não termina aqui: seu desafio é abrir caminho para a próxima geração de residentes.",
+    rising:"Cada turno mantém vivo o hospital que você ajudou a construir. Novas temporadas poderão expandir esse legado.",
+    ready:"Sua liderança se tornou parte da história do Hospital Vale."
+  }
+};
+
+function getCareerStage(level){
+  const safeLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
+  return CAREER_STAGES[safeLevel - 1];
 }
 
-function getCareerProgress(totalScore, level){
-  const score = Math.max(0, Number(totalScore) || 0);
-  const stages = {
-    1: { floor:0, next:301, nextTitle:"Plant. Júnior" },
-    2: { floor:301, next:801, nextTitle:"Plantonista" },
-    3: { floor:801, next:1501, nextTitle:"Médico Sênior" },
-    4: { floor:1501, next:null, nextTitle:null }
-  };
-  const stage = stages[Math.min(4, Math.max(1, level || 1))] || stages[1];
-  if (!stage.next) return { percent:100, label:"Cargo máximo alcançado", detail:"Sua trajetória no Hospital Vale chegou ao nível máximo." };
+function getRankTitle(level){
+  return getCareerStage(level).title;
+}
 
-  const span = stage.next - stage.floor;
+function createCareerState(level){
+  const safeLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
+  return {
+    reputation: clamp(42 + (safeLevel - 1) * 7, 0, 100),
+    reviewStrikes: 0,
+    chapter: safeLevel,
+    chapterProgress: 0,
+    lastEvent: "Seu primeiro registro no Hospital Vale foi aberto."
+  };
+}
+
+function normalizeCareerState(career, level){
+  const fallback = createCareerState(level);
+  const safeLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
+  return {
+    reputation: clamp(Number(career?.reputation ?? fallback.reputation) || 0, 0, 100),
+    reviewStrikes: clamp(Number(career?.reviewStrikes) || 0, 0, 3),
+    chapter: clamp(Number(career?.chapter) || safeLevel, 1, CAREER_STAGES.length),
+    chapterProgress: Math.max(0, Number(career?.chapterProgress) || 0),
+    lastEvent: String(career?.lastEvent || fallback.lastEvent)
+  };
+}
+
+function getCareerProgress(totalScore, level, reputation){
+  const score = Math.max(0, Number(totalScore) || 0);
+  const stage = getCareerStage(level);
+  const rep = clamp(Number(reputation) || 0, 0, 100);
+  if (!stage.nextScore){
+    return {
+      percent:100,
+      label:"Direção do Hospital Vale",
+      detail:"Você concluiu a jornada principal. Mantenha a reputação da equipe para proteger seu legado."
+    };
+  }
+
+  const span = stage.nextScore - stage.floor;
   const earned = clamp(score - stage.floor, 0, span);
-  const remaining = Math.max(0, stage.next - score);
+  const remaining = Math.max(0, stage.nextScore - score);
+  const scoreReady = remaining === 0;
+  const repGap = Math.max(0, stage.nextReputation - rep);
+  const detail = !scoreReady
+    ? `${remaining} ponto${remaining === 1 ? "" : "s"} e reputação ${stage.nextReputation} para evoluir.`
+    : repGap > 0
+      ? `A pontuação chegou; faltam ${repGap} ponto${repGap === 1 ? "" : "s"} de reputação para a avaliação.`
+      : "Você está pronto para a próxima avaliação de carreira.";
   return {
     percent: Math.round((earned / span) * 100),
     label: `Próximo cargo: ${stage.nextTitle}`,
-    detail: `${remaining} ponto${remaining === 1 ? "" : "s"} para evoluir.`
+    detail
   };
+}
+
+function getStoryState(career, level){
+  const chapterLevel = clamp(Math.max(Number(level) || 1, Number(career?.chapter) || 1), 1, CAREER_STAGES.length);
+  const chapter = STORY_CHAPTERS[chapterLevel] || STORY_CHAPTERS[1];
+  const progress = Number(career?.chapterProgress) || 0;
+  return {
+    ...chapter,
+    copy: progress === 0 ? chapter.opening : progress < 3 ? chapter.rising : chapter.ready
+  };
+}
+
+function applyCareerCaseOutcome({ career, level, totalScore, mode, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, outcome }){
+  const nextCareer = normalizeCareerState(career, level);
+  let nextLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
+  const cleanCase = diagCorrect
+    && missingExams.length === 0
+    && missingMeds.length === 0
+    && wrongExams.length === 0
+    && wrongMeds.length === 0
+    && outcome !== "death";
+  const concerningCase = !diagCorrect || outcome === "death" || wrongMeds.length > 0;
+
+  let reputationDelta = diagCorrect ? 7 : -8;
+  if (outcome === "improved") reputationDelta += 4;
+  if (outcome === "death") reputationDelta -= 12;
+  reputationDelta -= missingExams.length * 2;
+  reputationDelta -= missingMeds.length * 3;
+  reputationDelta -= wrongExams.length * 2;
+  reputationDelta -= wrongMeds.length * 4;
+  if (cleanCase) reputationDelta += 3;
+  // A Academia acompanha progresso, mas não transforma um erro de aprendizagem
+  // em punição disciplinar de carreira.
+  if (mode === "training") reputationDelta = Math.round(reputationDelta * 0.55);
+  nextCareer.reputation = clamp(nextCareer.reputation + reputationDelta, 0, 100);
+  nextCareer.chapterProgress += 1;
+
+  let event;
+  if (mode !== "training" && concerningCase){
+    nextCareer.reviewStrikes = clamp(nextCareer.reviewStrikes + 1, 0, 3);
+  } else if (cleanCase){
+    nextCareer.reviewStrikes = Math.max(0, nextCareer.reviewStrikes - 1);
+  }
+
+  if (mode !== "training" && nextCareer.reviewStrikes >= 3 && nextLevel > 1){
+    nextLevel -= 1;
+    nextCareer.reviewStrikes = 0;
+    nextCareer.chapter = nextLevel;
+    nextCareer.chapterProgress = 0;
+    nextCareer.lastEvent = "A comissão solicitou uma rotação de reforço antes de devolver novas responsabilidades.";
+    event = {
+      type:"demotion",
+      title:"Revisão de carreira",
+      copy:`A comissão reduziu seu cargo para ${getRankTitle(nextLevel)}. Reconstrua a confiança com turnos consistentes.`
+    };
+  } else {
+    const currentStage = getCareerStage(nextLevel);
+    if (currentStage.nextScore && totalScore >= currentStage.nextScore && nextCareer.reputation >= currentStage.nextReputation){
+      nextLevel += 1;
+      nextCareer.chapter = nextLevel;
+      nextCareer.chapterProgress = 0;
+      nextCareer.reviewStrikes = Math.max(0, nextCareer.reviewStrikes - 1);
+      nextCareer.lastEvent = `A comissão reconheceu sua evolução: ${getRankTitle(nextLevel)} desbloqueado.`;
+      event = {
+        type:"promotion",
+        title:"Promoção confirmada",
+        copy:`Seu desempenho abriu o cargo de ${getRankTitle(nextLevel)} e o próximo capítulo da história.`
+      };
+    } else if (mode === "training"){
+      nextCareer.lastEvent = "Treinamento registrado: o debriefing fortalece sua preparação, sem alerta disciplinar.";
+      event = {
+        type:"training",
+        title:"Treinamento registrado",
+        copy:"A Academia registrou seu aprendizado. O modo Treinamento não gera alerta disciplinar de carreira."
+      };
+    } else if (concerningCase){
+      const remaining = Math.max(0, 3 - nextCareer.reviewStrikes);
+      nextCareer.lastEvent = `A comissão marcou este turno para revisão. ${remaining} alerta${remaining === 1 ? "" : "s"} antes de uma possível reavaliação de cargo.`;
+      event = {
+        type:"warning",
+        title:"Turno em revisão",
+        copy: nextCareer.lastEvent
+      };
+    } else {
+      nextCareer.lastEvent = cleanCase
+        ? "A equipe registrou um turno consistente. Sua reputação avançou."
+        : "O debriefing foi registrado. Use as pistas do cenário para fortalecer o próximo turno.";
+      event = {
+        type:"progress",
+        title:"Trajetória atualizada",
+        copy: nextCareer.lastEvent
+      };
+    }
+  }
+
+  return { career:nextCareer, level:nextLevel, event, reputationDelta };
 }
 
 function formatVitals(v){
@@ -270,6 +485,12 @@ class GameEngine {
         incorrect: Number(playerProfile.stats.incorrect) || 0,
         deaths: Number(playerProfile.stats.deaths) || 0
       };
+    }
+    if (playerProfile){
+      playerProfile.career = normalizeCareerState(playerProfile.career, this.currentLevel);
+      playerProfile.role = getRankTitle(this.currentLevel);
+      savePlayerProfile(playerProfile);
+      window.playerProfile = playerProfile;
     }
 
     this.ui.updateLevel(this.currentLevel);
@@ -540,22 +761,38 @@ class GameEngine {
     this.casesAttended += 1;
     if (diagCorrect) this.stats.correct += 1; else this.stats.incorrect += 1;
 
-    const levelBefore = this.currentLevel;
     this.score += points;
     this.totalScore += points;
 
-    // progressão
-    if (this.totalScore > 300 && this.currentLevel < 2) this.currentLevel = 2;
-    if (this.totalScore > 800 && this.currentLevel < 3) this.currentLevel = 3;
-    if (this.totalScore > 1500 && this.currentLevel < 4) this.currentLevel = 4;
-
     // perfil persistente
     if (!playerProfile) playerProfile = window.playerProfile || null;
+    let careerEvent = {
+      type:"progress",
+      title:"Trajetória atualizada",
+      copy:"O turno foi registrado na sua carreira."
+    };
+    let career = normalizeCareerState(playerProfile?.career, this.currentLevel);
     if (playerProfile){
+      const careerUpdate = applyCareerCaseOutcome({
+        career,
+        level:this.currentLevel,
+        totalScore:this.totalScore,
+        mode:this.mode,
+        diagCorrect,
+        missingExams,
+        missingMeds,
+        wrongExams,
+        wrongMeds,
+        outcome
+      });
+      career = careerUpdate.career;
+      careerEvent = careerUpdate.event;
+      this.currentLevel = careerUpdate.level;
       playerProfile.score = this.totalScore;
       playerProfile.level = this.currentLevel;
       playerProfile.role = getRankTitle(this.currentLevel);
       playerProfile.stats = this.stats;
+      playerProfile.career = career;
       savePlayerProfile(playerProfile);
       window.playerProfile = playerProfile;
     }
@@ -566,7 +803,7 @@ class GameEngine {
     // relatório
     this.ui.showCaseReport({
       patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome,
-      career:getCareerProgress(this.totalScore, this.currentLevel), promoted:this.currentLevel > levelBefore
+      career:getCareerProgress(this.totalScore, this.currentLevel, career.reputation), careerEvent
     });
 
     // remove e seleciona próximo
@@ -615,6 +852,17 @@ class GameUI {
     this.careerProgressFill = document.getElementById("career-progress-fill");
     this.careerProgressLabel = document.getElementById("career-progress-label");
     this.careerProgressDetail = document.getElementById("career-progress-detail");
+    this.careerReputationValue = document.getElementById("career-reputation-value");
+    this.careerReputationFill = document.getElementById("career-reputation-fill");
+    this.careerReputationDetail = document.getElementById("career-reputation-detail");
+    this.storyKicker = document.getElementById("story-kicker");
+    this.storyTitle = document.getElementById("story-title");
+    this.storyCopy = document.getElementById("story-copy");
+    this.storyAvatar = document.getElementById("story-avatar");
+    this.storyMentor = document.getElementById("story-mentor");
+    this.storyRole = document.getElementById("story-role");
+    this.storyStatus = document.getElementById("story-status");
+    this.careerPath = document.getElementById("career-path");
 
     this.specialtySelect = document.getElementById("specialty-select");
     this.modeSelect = document.getElementById("mode-select");
@@ -691,6 +939,7 @@ class GameUI {
       const savedLevel = Number(playerProfile?.level) || engine.currentLevel || 1;
       const savedScore = Math.max(0, Number(playerProfile?.score) || 0);
       const savedStats = playerProfile?.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
+      const savedCareer = normalizeCareerState(playerProfile?.career, savedLevel);
       engine.currentLevel = savedLevel;
       engine.totalScore = savedScore;
       engine.stats = {
@@ -705,7 +954,8 @@ class GameUI {
         role: getRankTitle(savedLevel),
         level: savedLevel,
         score: savedScore,
-        stats: engine.stats
+        stats: engine.stats,
+        career: savedCareer
       };
       window.playerProfile = playerProfile;
       savePlayerProfile(playerProfile);
@@ -805,10 +1055,32 @@ class GameUI {
     this.officeLevel.textContent = `${role} • Nível ${lvl}`;
     this.officeScore.textContent = String(prof.score ?? 0);
 
-    const career = getCareerProgress(prof.score ?? engine.totalScore, lvl);
+    const careerState = normalizeCareerState(prof.career, lvl);
+    const career = getCareerProgress(prof.score ?? engine.totalScore, lvl, careerState.reputation);
     if (this.careerProgressFill) this.careerProgressFill.style.width = `${career.percent}%`;
     if (this.careerProgressLabel) this.careerProgressLabel.textContent = career.label;
     if (this.careerProgressDetail) this.careerProgressDetail.textContent = career.detail;
+    if (this.careerReputationValue) this.careerReputationValue.textContent = `${careerState.reputation}/100`;
+    if (this.careerReputationFill) this.careerReputationFill.style.width = `${careerState.reputation}%`;
+    if (this.careerReputationDetail){
+      const reviewNote = careerState.reviewStrikes > 0
+        ? `${careerState.reviewStrikes} alerta${careerState.reviewStrikes === 1 ? "" : "s"} de revisão ativo${careerState.reviewStrikes === 1 ? "" : "s"}.`
+        : "Sem alertas de revisão ativos.";
+      this.careerReputationDetail.textContent = `${reviewNote} ${careerState.lastEvent}`;
+    }
+
+    const story = getStoryState(careerState, lvl);
+    if (this.storyKicker) this.storyKicker.textContent = story.kicker;
+    if (this.storyTitle) this.storyTitle.textContent = story.title;
+    if (this.storyCopy) this.storyCopy.textContent = story.copy;
+    if (this.storyAvatar){
+      this.storyAvatar.src = story.avatar;
+      this.storyAvatar.alt = `${story.mentor}, ${story.role}`;
+    }
+    if (this.storyMentor) this.storyMentor.textContent = story.mentor;
+    if (this.storyRole) this.storyRole.textContent = story.role;
+    if (this.storyStatus) this.storyStatus.textContent = careerState.lastEvent;
+    this.renderCareerPath(lvl);
 
     const stats = prof.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
     const total = (stats.correct||0) + (stats.incorrect||0);
@@ -826,6 +1098,15 @@ class GameUI {
     if (playerNameDisplay){
       playerNameDisplay.textContent = prof.name || "—";
     }
+  }
+
+  renderCareerPath(level){
+    if (!this.careerPath) return;
+    const safeLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
+    this.careerPath.innerHTML = CAREER_STAGES.map((stage) => {
+      const status = stage.level === safeLevel ? "career-path-current" : stage.level < safeLevel ? "career-path-complete" : "";
+      return `<span class="${status}">${stage.title}</span>`;
+    }).join("");
   }
 
   updateLevel(level){
@@ -1140,7 +1421,7 @@ class GameUI {
     // remove anterior
     if (this.reportOverlay) this.reportOverlay.remove();
 
-    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome, career, promoted } = r;
+    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome, career, careerEvent } = r;
 
     const overlay = document.createElement("div");
     overlay.className = "overlay report-overlay";
@@ -1161,9 +1442,9 @@ class GameUI {
             <div class="muted" style="margin-top:6px;">A pontuação compara suas escolhas com as regras deste cenário.</div>
           </div>
           <div class="report-card career-report-card">
-            <h3>${promoted ? "Promoção desbloqueada" : "Trajetória"}</h3>
-            <div><b class="${promoted ? "ok" : ""}">${promoted ? "Novo cargo no Hospital Vale" : career.label}</b></div>
-            <div class="muted" style="margin-top:6px;">${promoted ? "Seu desempenho elevou seu nível nesta jornada fictícia." : career.detail}</div>
+            <h3>${careerEvent?.title || "Trajetória"}</h3>
+            <div><b class="${careerEvent?.type === "promotion" ? "ok" : careerEvent?.type === "demotion" || careerEvent?.type === "warning" ? "bad" : ""}">${careerEvent?.copy || career.label}</b></div>
+            <div class="muted" style="margin-top:6px;">${career.label} · ${career.detail}</div>
           </div>
         </div>
 
