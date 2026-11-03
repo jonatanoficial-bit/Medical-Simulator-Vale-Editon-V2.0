@@ -1,0 +1,19 @@
+{
+  "name": "Hospital Vale — Simulador Médico",
+  "short_name": "Hospital Vale",
+  "description": "Jornada de carreira e treinamento por cenários no Hospital Vale.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07131d",
+  "theme_color": "#07131d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "images/vale_games_logo.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

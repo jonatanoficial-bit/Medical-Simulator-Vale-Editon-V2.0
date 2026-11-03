@@ -3,11 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Simulador Médico (Atualizado)</title>
+  <meta name="theme-color" content="#07131d" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hospital Vale" />
+  <title>Hospital Vale — Simulador Médico</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=20261103-f13" />
+  <!-- Fase 13: carregamento antecipado somente de artes que já pertencem ao jogo. -->
+  <link rel="preload" as="image" href="images/vale_games_logo.jpg" />
+  <link rel="preload" as="image" href="images/bg_hospital_02.jpg" />
+  <link rel="preload" as="image" href="images/hospital_corridor.png" />
   <!-- Motor visual local. Os fundos e avatares continuam carregados da pasta images deste projeto. -->
-  <link rel="stylesheet" href="./style.css?v=20261103-f12a" />
+  <link rel="stylesheet" href="./style.css?v=20261103-f13" />
   <!-- Folha de estilo personalizada para ajustes de layout e elementos adicionais (logo inicial) -->
-  <link rel="stylesheet" href="./custom.css?v=20261103-f12a" />
+  <link rel="stylesheet" href="./custom.css?v=20261103-f13" />
 </head>
 <body>
 
@@ -336,7 +346,7 @@
   <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
 
   <!-- Carrega o motor local e, em seguida, melhorias de interface sem alterar a engine em runtime. -->
-  <script src="./script.js?v=20261103-f12a" defer></script>
-  <script src="./custom.js?v=20261103-f12a" defer></script>
+  <script src="./script.js?v=20261103-f13" defer></script>
+  <script src="./custom.js?v=20261103-f13" defer></script>
 </body>
 </html>
