@@ -203,6 +203,98 @@ function getStoryState(career, level){
   };
 }
 
+// Fase 11: progresso de aprendizagem separado de pontuação e cargo. Ele mede
+// como o jogador explora os cenários do jogo, sem virar protocolo clínico.
+function createLearningState(){
+  return {
+    mastery: 0,
+    streak: 0,
+    assessmentCount: 0,
+    investigationCount: 0,
+    safeClosureCount: 0,
+    badges: [],
+    lastEvent: "Sua rotação começa com uma boa leitura das pistas do cenário."
+  };
+}
+
+function normalizeLearningState(learning){
+  const fallback = createLearningState();
+  const validBadges = new Set(["Leitor de pistas", "Investigador do Vale", "Registro consciente", "Ritmo de plantão"]);
+  const badges = Array.isArray(learning?.badges)
+    ? learning.badges.filter(badge => validBadges.has(badge))
+    : [];
+  return {
+    mastery: clamp(Number(learning?.mastery) || 0, 0, 100),
+    streak: Math.max(0, Number(learning?.streak) || 0),
+    assessmentCount: Math.max(0, Number(learning?.assessmentCount) || 0),
+    investigationCount: Math.max(0, Number(learning?.investigationCount) || 0),
+    safeClosureCount: Math.max(0, Number(learning?.safeClosureCount) || 0),
+    badges,
+    lastEvent: String(learning?.lastEvent || fallback.lastEvent)
+  };
+}
+
+function getLearningChallenge(learning){
+  const state = normalizeLearningState(learning);
+  if (state.assessmentCount < 3){
+    return "Abra história e exame físico antes de encerrar o cenário para registrar suas primeiras pistas.";
+  }
+  if (state.investigationCount < 3){
+    return "Quando o cenário permitir, registre uma investigação e acompanhe o retorno antes do debriefing.";
+  }
+  if (state.safeClosureCount < 3){
+    return "Busque fechar uma rota completa do cenário: pistas, investigação disponível e decisão final sem itens inadequados.";
+  }
+  return "Mantenha uma sequência de turnos bem registrados para fortalecer sua credencial no Hospital Vale.";
+}
+
+function applyLearningCaseOutcome({ learning, patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, outcome }){
+  const next = normalizeLearningState(learning);
+  const completedAssessment = Boolean(patient.requested.history && patient.requested.physical_exam);
+  const investigated = (patient.requested.exams || []).length > 0;
+  const cleanClosure = diagCorrect
+    && completedAssessment
+    && missingExams.length === 0
+    && missingMeds.length === 0
+    && wrongExams.length === 0
+    && wrongMeds.length === 0
+    && outcome !== "death";
+
+  if (completedAssessment) next.assessmentCount += 1;
+  if (investigated) next.investigationCount += 1;
+  if (cleanClosure) next.safeClosureCount += 1;
+
+  let masteryGain = 1;
+  if (completedAssessment) masteryGain += 2;
+  if (investigated) masteryGain += 2;
+  if (diagCorrect) masteryGain += 3;
+  if (cleanClosure) masteryGain += 4;
+  next.mastery = clamp(next.mastery + masteryGain, 0, 100);
+  next.streak = cleanClosure ? next.streak + 1 : Math.max(0, next.streak - 1);
+
+  const awarded = [];
+  const unlock = (badge, condition) => {
+    if (condition && !next.badges.includes(badge)){
+      next.badges.push(badge);
+      awarded.push(badge);
+    }
+  };
+  unlock("Leitor de pistas", next.assessmentCount >= 3);
+  unlock("Investigador do Vale", next.investigationCount >= 3);
+  unlock("Registro consciente", next.safeClosureCount >= 1);
+  unlock("Ritmo de plantão", next.streak >= 3);
+
+  const copy = awarded.length
+    ? `Nova credencial: ${awarded.join(", ")}.`
+    : cleanClosure
+      ? "Rota completa registrada. Sua sequência de plantão avançou."
+      : completedAssessment
+        ? "Pistas iniciais registradas. Revise o debriefing e conecte as descobertas no próximo turno."
+        : "O debriefing mostrou uma oportunidade: abra história e exame físico antes de registrar a decisão final.";
+  next.lastEvent = copy;
+  return { learning:next, event:{ title: awarded.length ? "Credencial conquistada" : "Rotação atualizada", copy, awarded, cleanClosure } };
+}
+
 function applyCareerCaseOutcome({ career, level, totalScore, mode, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, outcome }){
   const nextCareer = normalizeCareerState(career, level);
   let nextLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
@@ -488,6 +580,7 @@ class GameEngine {
     }
     if (playerProfile){
       playerProfile.career = normalizeCareerState(playerProfile.career, this.currentLevel);
+      playerProfile.learning = normalizeLearningState(playerProfile.learning);
       playerProfile.role = getRankTitle(this.currentLevel);
       savePlayerProfile(playerProfile);
       window.playerProfile = playerProfile;
@@ -772,6 +865,11 @@ class GameEngine {
       copy:"O turno foi registrado na sua carreira."
     };
     let career = normalizeCareerState(playerProfile?.career, this.currentLevel);
+    let learning = normalizeLearningState(playerProfile?.learning);
+    let learningEvent = {
+      title:"Rotação atualizada",
+      copy:"Seu turno foi registrado na Academia do Hospital Vale."
+    };
     if (playerProfile){
       const careerUpdate = applyCareerCaseOutcome({
         career,
@@ -787,12 +885,25 @@ class GameEngine {
       });
       career = careerUpdate.career;
       careerEvent = careerUpdate.event;
+      const learningUpdate = applyLearningCaseOutcome({
+        learning,
+        patient,
+        diagCorrect,
+        missingExams,
+        missingMeds,
+        wrongExams,
+        wrongMeds,
+        outcome
+      });
+      learning = learningUpdate.learning;
+      learningEvent = learningUpdate.event;
       this.currentLevel = careerUpdate.level;
       playerProfile.score = this.totalScore;
       playerProfile.level = this.currentLevel;
       playerProfile.role = getRankTitle(this.currentLevel);
       playerProfile.stats = this.stats;
       playerProfile.career = career;
+      playerProfile.learning = learning;
       savePlayerProfile(playerProfile);
       window.playerProfile = playerProfile;
     }
@@ -803,7 +914,7 @@ class GameEngine {
     // relatório
     this.ui.showCaseReport({
       patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome,
-      career:getCareerProgress(this.totalScore, this.currentLevel, career.reputation), careerEvent
+      career:getCareerProgress(this.totalScore, this.currentLevel, career.reputation), careerEvent, learning, learningEvent
     });
 
     // remove e seleciona próximo
@@ -863,6 +974,14 @@ class GameUI {
     this.storyRole = document.getElementById("story-role");
     this.storyStatus = document.getElementById("story-status");
     this.careerPath = document.getElementById("career-path");
+    this.officeBody = document.getElementById("office-body");
+    this.officeViewButtons = Array.from(document.querySelectorAll("[data-office-view-button]"));
+    this.immersiveButton = document.getElementById("immersive-button");
+    this.referenceCenterButton = document.getElementById("reference-center-button");
+    this.learningMastery = document.getElementById("learning-mastery");
+    this.learningChallenge = document.getElementById("learning-challenge");
+    this.learningStreak = document.getElementById("learning-streak");
+    this.learningBadges = document.getElementById("learning-badges");
 
     this.specialtySelect = document.getElementById("specialty-select");
     this.modeSelect = document.getElementById("mode-select");
@@ -888,6 +1007,8 @@ class GameUI {
     this.diagnosisPage = document.getElementById("diagnosis-page");
     this.diagnosisContent = document.getElementById("diagnosis-content");
     this.diagnosisBack = document.getElementById("diagnosis-back");
+    this.referencePage = document.getElementById("reference-page");
+    this.referenceBack = document.getElementById("reference-back");
 
     this.toastEl = null;
     this.reportOverlay = null;
@@ -940,6 +1061,7 @@ class GameUI {
       const savedScore = Math.max(0, Number(playerProfile?.score) || 0);
       const savedStats = playerProfile?.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
       const savedCareer = normalizeCareerState(playerProfile?.career, savedLevel);
+      const savedLearning = normalizeLearningState(playerProfile?.learning);
       engine.currentLevel = savedLevel;
       engine.totalScore = savedScore;
       engine.stats = {
@@ -955,12 +1077,14 @@ class GameUI {
         level: savedLevel,
         score: savedScore,
         stats: engine.stats,
-        career: savedCareer
+        career: savedCareer,
+        learning: savedLearning
       };
       window.playerProfile = playerProfile;
       savePlayerProfile(playerProfile);
 
       this.lobbyScreen.classList.remove("active");
+      this.setOfficeView("command");
       this.updateOffice(engine);
       this.officeScreen.classList.add("active");
     });
@@ -995,6 +1119,7 @@ class GameUI {
     this.finishShiftBtn.addEventListener("click", () => {
       engine.stop();
       this.gameScreen.classList.remove("active");
+      this.setOfficeView("command");
       this.updateOffice(engine);
       this.officeScreen.classList.add("active");
       this.toast("Plantão encerrado. Sua trajetória foi mantida.");
@@ -1004,11 +1129,45 @@ class GameUI {
     this.examBack.addEventListener("click", () => this.hideOverlay("exam"));
     this.treatmentBack.addEventListener("click", () => this.hideOverlay("treatment"));
     this.diagnosisBack.addEventListener("click", () => this.hideOverlay("diagnosis"));
+    this.referenceBack?.addEventListener("click", () => this.hideOverlay("reference"));
+    this.referenceCenterButton?.addEventListener("click", () => this.showOverlay("reference"));
+
+    this.officeViewButtons.forEach(button => {
+      button.addEventListener("click", () => this.setOfficeView(button.dataset.officeViewButton));
+    });
+    this.immersiveButton?.addEventListener("click", () => this.toggleImmersiveMode());
+    document.addEventListener("fullscreenchange", () => this.updateImmersiveButton());
 
     // inicializa selects de especialidade após loadData
     fillSpecialties(engine.cases, this.specialtySelect);
     this.updateModeExplainer();
     this.updateOffice(engine);
+  }
+
+  setOfficeView(view){
+    const safeView = ["command", "career", "story"].includes(view) ? view : "command";
+    if (this.officeBody) this.officeBody.dataset.activeView = safeView;
+    this.officeViewButtons.forEach(button => {
+      const active = button.dataset.officeViewButton === safeView;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  updateImmersiveButton(){
+    if (!this.immersiveButton) return;
+    const active = Boolean(document.fullscreenElement);
+    this.immersiveButton.textContent = active ? "Sair do imersivo" : "Modo imersivo";
+    this.immersiveButton.setAttribute("aria-pressed", String(active));
+  }
+
+  async toggleImmersiveMode(){
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen?.();
+      else await document.documentElement.requestFullscreen?.();
+    } catch {
+      this.toast("O navegador bloqueou o modo imersivo nesta janela.");
+    }
   }
 
   updateModeExplainer(){
@@ -1056,6 +1215,7 @@ class GameUI {
     this.officeScore.textContent = String(prof.score ?? 0);
 
     const careerState = normalizeCareerState(prof.career, lvl);
+    const learningState = normalizeLearningState(prof.learning);
     const career = getCareerProgress(prof.score ?? engine.totalScore, lvl, careerState.reputation);
     if (this.careerProgressFill) this.careerProgressFill.style.width = `${career.percent}%`;
     if (this.careerProgressLabel) this.careerProgressLabel.textContent = career.label;
@@ -1081,6 +1241,14 @@ class GameUI {
     if (this.storyRole) this.storyRole.textContent = story.role;
     if (this.storyStatus) this.storyStatus.textContent = careerState.lastEvent;
     this.renderCareerPath(lvl);
+    if (this.learningMastery) this.learningMastery.textContent = `Domínio ${learningState.mastery}%`;
+    if (this.learningChallenge) this.learningChallenge.textContent = getLearningChallenge(learningState);
+    if (this.learningStreak) this.learningStreak.textContent = `Sequência: ${learningState.streak} turno${learningState.streak === 1 ? "" : "s"}`;
+    if (this.learningBadges){
+      this.learningBadges.textContent = learningState.badges.length
+        ? `Credenciais: ${learningState.badges.join(" · ")}`
+        : "Credenciais: em formação";
+    }
 
     const stats = prof.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
     const total = (stats.correct||0) + (stats.incorrect||0);
@@ -1409,19 +1577,21 @@ class GameUI {
     if (which === "exam") this.examPage.classList.remove("hidden");
     if (which === "treatment") this.treatmentPage.classList.remove("hidden");
     if (which === "diagnosis") this.diagnosisPage.classList.remove("hidden");
+    if (which === "reference") this.referencePage?.classList.remove("hidden");
   }
 
   hideOverlay(which){
     if (which === "exam") this.examPage.classList.add("hidden");
     if (which === "treatment") this.treatmentPage.classList.add("hidden");
     if (which === "diagnosis") this.diagnosisPage.classList.add("hidden");
+    if (which === "reference") this.referencePage?.classList.add("hidden");
   }
 
   showCaseReport(r){
     // remove anterior
     if (this.reportOverlay) this.reportOverlay.remove();
 
-    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome, career, careerEvent } = r;
+    const { patient, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, points, outcome, career, careerEvent, learning, learningEvent } = r;
 
     const overlay = document.createElement("div");
     overlay.className = "overlay report-overlay";
@@ -1445,6 +1615,11 @@ class GameUI {
             <h3>${careerEvent?.title || "Trajetória"}</h3>
             <div><b class="${careerEvent?.type === "promotion" ? "ok" : careerEvent?.type === "demotion" || careerEvent?.type === "warning" ? "bad" : ""}">${careerEvent?.copy || career.label}</b></div>
             <div class="muted" style="margin-top:6px;">${career.label} · ${career.detail}</div>
+          </div>
+          <div class="report-card learning-report-card">
+            <h3>${learningEvent?.title || "Rotação"}</h3>
+            <div><b class="ok">${learningEvent?.copy || "Turno registrado."}</b></div>
+            <div class="muted" style="margin-top:6px;">Domínio ${learning?.mastery ?? 0}% · sequência ${learning?.streak ?? 0} · ${learning?.badges?.length || 0} credencial(is)</div>
           </div>
         </div>
 

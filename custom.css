@@ -492,6 +492,104 @@ select:focus-visible {
   border-color: rgba(143, 211, 255, 0.26);
 }
 
+/* Fases 10 e 11: a central substitui a sensação de página extensa por um
+   console de jogo. Ela usa somente cenários e imagens já existentes. */
+.office-commandbar {
+  width: min(980px, 100%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 9px 10px;
+  border: 1px solid rgba(143, 211, 255, 0.24);
+  border-radius: 18px;
+  background: linear-gradient(100deg, rgba(5, 20, 31, 0.82), rgba(14, 42, 59, 0.52));
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(14px);
+}
+
+.office-command-label { display: grid; gap: 2px; margin-right: auto; }
+.office-command-label span { color: #9bdcff; font-size: 9px; font-weight: 900; letter-spacing: 0.13em; }
+.office-command-label strong { color: rgba(255,255,255,0.94); font-size: 13px; }
+.office-tabs { display: flex; gap: 5px; }
+.office-tab,
+.immersive-button,
+.reference-center-button {
+  border: 1px solid rgba(143, 211, 255, 0.23);
+  color: rgba(255,255,255,0.88);
+  background: rgba(2, 12, 21, 0.40);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.office-tab { padding: 8px 10px; border-radius: 11px; }
+.office-tab.is-active {
+  border-color: rgba(143, 211, 255, 0.56);
+  background: linear-gradient(110deg, rgba(63, 143, 191, 0.44), rgba(70, 199, 192, 0.24));
+  box-shadow: 0 0 18px rgba(101, 203, 230, 0.18) inset;
+}
+.immersive-button { padding: 8px 10px; border-radius: 11px; white-space: nowrap; }
+.reference-center-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: linear-gradient(100deg, rgba(12, 44, 59, 0.58), rgba(14, 25, 43, 0.54));
+}
+.reference-center-button span { color: #9bdcff; font-size: 16px; }
+
+.shift-challenge {
+  margin-top: 13px;
+  padding: 13px;
+  border: 1px solid rgba(134, 224, 213, 0.25);
+  border-radius: 17px;
+  background: linear-gradient(125deg, rgba(8, 40, 49, 0.78), rgba(7, 18, 30, 0.60));
+}
+.shift-challenge-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.shift-challenge .chapter-kicker { margin-bottom: 4px; }
+.shift-challenge h4 { margin: 0; font-size: 15px; }
+.shift-challenge p { margin: 8px 0 0; color: rgba(255,255,255,0.76); font-size: 12px; line-height: 1.42; }
+.mastery-badge { flex: 0 0 auto; padding: 6px 8px; border: 1px solid rgba(134, 224, 213, 0.34); border-radius: 999px; color: #d5fff9; background: rgba(34, 136, 125, 0.18); font-size: 11px; font-weight: 800; }
+.learning-metrics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 11px; }
+.learning-metrics span { padding: 5px 7px; border-radius: 999px; background: rgba(0,0,0,0.20); color: rgba(255,255,255,0.72); font-size: 10px; }
+.learning-report-card { grid-column: 1 / -1; border-color: rgba(134, 224, 213, 0.26); }
+
+.reference-content { max-width: 950px; }
+.reference-hero {
+  display: flex;
+  align-items: end;
+  min-height: 145px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba(143, 211, 255, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(0deg, rgba(2, 13, 22, 0.89), rgba(2, 13, 22, 0.12)), url("images/labs.png") center / cover no-repeat;
+}
+.reference-hero span { color: #d8f4ff; font-size: 10px; font-weight: 900; letter-spacing: 0.13em; }
+.reference-content h2 { margin: 0; }
+.reference-lead,
+.reference-disclaimer { color: rgba(255,255,255,0.74); font-size: 13px; line-height: 1.5; }
+.reference-lead { margin: 8px 0 16px; }
+.reference-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.reference-card {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  border: 1px solid rgba(143, 211, 255, 0.20);
+  border-radius: 18px;
+  background: rgba(3, 14, 24, 0.62);
+}
+.reference-source { color: #9bdcff; font-size: 9px; font-weight: 900; letter-spacing: 0.08em; }
+.reference-card h3 { margin: 10px 0 7px; font-size: 15px; }
+.reference-card p { margin: 0; color: rgba(255,255,255,0.74); font-size: 12px; line-height: 1.46; }
+.reference-card a { margin-top: auto; padding-top: 13px; color: #bceaff; font-size: 12px; font-weight: 800; }
+.reference-disclaimer { margin: 14px 0 0; padding: 10px 12px; border-left: 3px solid rgba(255, 202, 102, 0.72); border-radius: 9px; background: rgba(0,0,0,0.18); font-size: 11px; }
+
 /* Fase 7: a Academia usa as imagens já existentes como ambientação. Nenhum
    arquivo de arte é substituído, recortado ou regravado. */
 .mode-explainer {
@@ -698,4 +796,24 @@ select:focus-visible {
   .location-marker { order: 3; width: 100%; }
   .top-actions { gap: 6px; }
   .top-bar .ghost-btn { min-width: 0; padding: 10px 11px; }
+
+  /* No telefone a central mostra uma área por vez. Isso elimina a parede
+     vertical de cartões e faz o lobby operar como o menu de um jogo. */
+  #office-screen { padding: 14px 10px 18px; }
+  #office-screen .office-header,
+  #office-screen .office-commandbar,
+  #office-screen .office-body { width: min(980px, 100%); }
+  .office-commandbar { flex-wrap: wrap; gap: 8px; padding: 9px; }
+  .office-command-label { flex: 1 1 120px; }
+  .office-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .office-tab { min-height: 38px; padding: 8px 4px; }
+  .immersive-button { margin-left: auto; font-size: 11px; }
+  .office-body[data-active-view] > .office-card { display: none; }
+  .office-body[data-active-view="command"] > [data-office-view="command"],
+  .office-body[data-active-view="career"] > [data-office-view="career"],
+  .office-body[data-active-view="story"] > [data-office-view="story"] { display: block; }
+  .office-card { padding: 14px; }
+  .reference-grid { grid-template-columns: 1fr; }
+  .reference-card { min-height: 0; }
+  .reference-card a { margin-top: 12px; }
 }

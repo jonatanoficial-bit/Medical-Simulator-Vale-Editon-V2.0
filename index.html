@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Simulador Médico (Atualizado)</title>
   <!-- Motor visual local. Os fundos e avatares continuam carregados da pasta images deste projeto. -->
-  <link rel="stylesheet" href="./style.css?v=20261103-f89b" />
+  <link rel="stylesheet" href="./style.css?v=20261103-f1011" />
   <!-- Folha de estilo personalizada para ajustes de layout e elementos adicionais (logo inicial) -->
-  <link rel="stylesheet" href="./custom.css?v=20261103-f89b" />
+  <link rel="stylesheet" href="./custom.css?v=20261103-f1011" />
 </head>
 <body>
 
@@ -80,8 +80,20 @@
         <div id="office-score" class="score-value">0</div>
       </div>
     </div>
-    <div class="office-body">
-      <div class="office-card">
+    <div class="office-commandbar" aria-label="Central de comando do Hospital Vale">
+      <div class="office-command-label">
+        <span>HOSPITAL VALE</span>
+        <strong>Central de comando</strong>
+      </div>
+      <div class="office-tabs" aria-label="Áreas da central">
+        <button type="button" class="office-tab is-active" data-office-view-button="command" aria-pressed="true">Central</button>
+        <button type="button" class="office-tab" data-office-view-button="career" aria-pressed="false">Carreira</button>
+        <button type="button" class="office-tab" data-office-view-button="story" aria-pressed="false">História</button>
+      </div>
+      <button id="immersive-button" type="button" class="immersive-button" aria-pressed="false">Modo imersivo</button>
+    </div>
+    <div id="office-body" class="office-body" data-active-view="command">
+      <div class="office-card" data-office-view="command">
         <h3>Estatísticas</h3>
         <div class="stats-grid">
           <div class="stat"><div class="stat-label">Casos</div><div id="stat-total" class="stat-value">0</div></div>
@@ -103,10 +115,25 @@
           </div>
         </div>
         <p id="mode-explainer" class="mode-explainer" aria-live="polite">Treinamento guiado: você terá tempo ampliado para observar o caso, pedir retornos e revisar a decisão.</p>
+        <section class="shift-challenge" aria-live="polite" aria-label="Desafio atual da rotação">
+          <div class="shift-challenge-heading">
+            <div>
+              <span class="chapter-kicker">FASE 11 · ROTAÇÃO ATIVA</span>
+              <h4>Desafio da rotação</h4>
+            </div>
+            <span id="learning-mastery" class="mastery-badge">Domínio 0%</span>
+          </div>
+          <p id="learning-challenge">Abra história e exame físico antes de encerrar o cenário para registrar suas primeiras pistas.</p>
+          <div class="learning-metrics">
+            <span id="learning-streak">Sequência: 0 turnos</span>
+            <span id="learning-badges">Credenciais: em formação</span>
+          </div>
+        </section>
+        <button id="reference-center-button" type="button" class="reference-center-button">Biblioteca de referência <span>↗</span></button>
         <button id="next-case-button" class="primary-btn">Próximo caso</button>
         <button id="back-office" class="ghost-btn" style="margin-top:10px;">Voltar (trocar perfil)</button>
       </div>
-      <div class="office-card">
+      <div class="office-card" data-office-view="career">
         <h3>Seu Cargo</h3>
         <div class="profile-row">
           <img id="player-avatar" class="mini-avatar" alt="avatar" style="display:none;" />
@@ -131,7 +158,7 @@
           <p id="career-reputation-detail">A equipe ainda está conhecendo seu trabalho.</p>
         </div>
       </div>
-      <div class="office-card residency-brief">
+      <div class="office-card residency-brief" data-office-view="story">
         <span id="story-kicker" class="chapter-kicker">CAPÍTULO 1 · PRIMEIRO PLANTÃO</span>
         <h3 id="story-title">A porta de entrada</h3>
         <p id="story-copy">Você acabou de assumir como residente. A diretoria acompanha cada turno: construa reputação, desbloqueie responsabilidades e deixe sua marca no hospital.</p>
@@ -231,10 +258,42 @@
     </div>
   </div>
 
+  <!-- Fase 10: fontes abertas em outra aba; os resumos situam o jogador e não prescrevem condutas reais. -->
+  <div id="reference-page" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reference-title">
+    <div class="overlay-content reference-content">
+      <div class="reference-hero" aria-hidden="true"><span>ACADEMIA DO HOSPITAL VALE · REFERÊNCIAS</span></div>
+      <span class="chapter-kicker">FASE 10 · BIBLIOTECA DO RESIDENTE</span>
+      <h2 id="reference-title">Referências para estudar entre os turnos</h2>
+      <p class="reference-lead">Use estas fontes para entender estruturas de avaliação e organização do atendimento. No jogo, elas não substituem a rota de cada cenário; fora dele, protocolos locais atualizados e supervisão habilitada sempre prevalecem.</p>
+      <div class="reference-grid">
+        <article class="reference-card">
+          <span class="reference-source">OMS · ICRC · IFEM</span>
+          <h3>Avaliação inicial estruturada</h3>
+          <p>O curso Basic Emergency Care apresenta ABCDE e história SAMPLE como estruturas educacionais para a avaliação inicial de doença aguda e trauma.</p>
+          <a href="https://www.who.int/publications/i/item/basic-emergency-care-approach-to-the-acutely-ill-and-injured" target="_blank" rel="noopener noreferrer">Abrir fonte oficial</a>
+        </article>
+        <article class="reference-card">
+          <span class="reference-source">AMERICAN HEART ASSOCIATION · 2025</span>
+          <h3>Resposta organizada à emergência</h3>
+          <p>As diretrizes de suporte básico de vida abordam reconhecimento, ativação da resposta de emergência e uso de recursos como parte de uma resposta em equipe.</p>
+          <a href="https://cpr.heart.org/en/resuscitation-science/cpr-and-ecc-guidelines/adult-basic-life-support" target="_blank" rel="noopener noreferrer">Abrir diretriz oficial</a>
+        </article>
+        <article class="reference-card">
+          <span class="reference-source">MINISTÉRIO DA SAÚDE · BRASIL</span>
+          <h3>Acolhimento e classificação de risco</h3>
+          <p>Material de referência sobre acolhimento e classificação de risco em urgência, para contextualizar o fluxo do Hospital Vale sem reproduzir um protocolo local.</p>
+          <a href="https://bvsms.saude.gov.br/bvs/publicacoes/acolhimento_classificaao_risco_servico_urgencia.pdf" target="_blank" rel="noopener noreferrer">Abrir publicação oficial</a>
+        </article>
+      </div>
+      <p class="reference-disclaimer">Material educacional do jogo, sem doses e sem indicação individual. Em uma situação real, siga o serviço de emergência, sua instituição e profissionais habilitados.</p>
+      <button id="reference-back" type="button" class="overlay-back">Voltar à central</button>
+    </div>
+  </div>
+
   <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
 
   <!-- Carrega o motor local e, em seguida, melhorias de interface sem alterar a engine em runtime. -->
-  <script src="./script.js?v=20261103-f89b" defer></script>
-  <script src="./custom.js?v=20261103-f89b" defer></script>
+  <script src="./script.js?v=20261103-f1011" defer></script>
+  <script src="./custom.js?v=20261103-f1011" defer></script>
 </body>
 </html>
