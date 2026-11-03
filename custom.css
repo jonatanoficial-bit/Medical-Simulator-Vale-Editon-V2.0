@@ -560,6 +560,46 @@ select:focus-visible {
 .learning-metrics span { padding: 5px 7px; border-radius: 999px; background: rgba(0,0,0,0.20); color: rgba(255,255,255,0.72); font-size: 10px; }
 .learning-report-card { grid-column: 1 / -1; border-color: rgba(134, 224, 213, 0.26); }
 
+/* Fase 14: quadro competitivo local. Ele usa a ambientação existente e deixa
+   claro que os marcos são do próprio Hospital Vale, não dados online. */
+.season-board { overflow: hidden; }
+.season-board-hero {
+  margin: -18px -18px 16px;
+  padding: 70px 18px 18px;
+  border-bottom: 1px solid rgba(143, 211, 255, 0.24);
+  background: linear-gradient(0deg, rgba(2, 13, 22, 0.92), rgba(2, 13, 22, 0.20)), url("images/bg_hospital_01.jpg") center / cover no-repeat;
+}
+.season-board-hero .chapter-kicker { display: block; margin-bottom: 7px; }
+.season-board-hero h3 { margin: 0; font-size: 22px; }
+.season-board-hero p { max-width: 580px; margin: 8px 0 0; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.48; }
+.season-player-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(134, 224, 213, 0.34);
+  border-radius: 16px;
+  background: linear-gradient(120deg, rgba(12, 59, 65, 0.58), rgba(8, 20, 34, 0.64));
+}
+.season-label, .season-score-block span, .season-country-control > span { display: block; color: #9bdcff; font-size: 9px; font-weight: 900; letter-spacing: 0.12em; }
+.season-player-card > div > strong { display: block; margin-top: 4px; font-size: 17px; }
+.season-player-card p { margin: 5px 0 0; color: rgba(255,255,255,0.70); font-size: 11px; line-height: 1.4; }
+.season-score-block { min-width: 72px; padding-left: 13px; border-left: 1px solid rgba(255,255,255,0.15); text-align: right; }
+.season-score-block strong { display: block; margin-top: 4px; color: #d5fff9; font-size: 24px; }
+.season-country-control { display: grid; gap: 7px; margin-top: 13px; }
+.season-country-control select { width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid rgba(143,211,255,0.26); border-radius: 12px; color: rgba(255,255,255,0.92); background: rgba(3, 14, 24, 0.62); font: inherit; }
+.season-reference-list { display: grid; gap: 7px; margin: 13px 0 0; padding: 0; list-style: none; }
+.season-reference-entry { display: grid; grid-template-columns: 31px 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.11); border-radius: 13px; background: rgba(3, 14, 24, 0.44); }
+.season-reference-entry.is-player { border-color: rgba(134, 224, 213, 0.52); background: rgba(35, 127, 120, 0.20); box-shadow: 0 0 22px rgba(75, 215, 190, 0.08) inset; }
+.season-entry-position { color: #9bdcff; font-size: 12px; font-weight: 900; }
+.season-entry-flag { font-size: 18px; line-height: 1; }
+.season-entry-identity { min-width: 0; display: grid; gap: 2px; }
+.season-entry-identity strong { overflow: hidden; color: rgba(255,255,255,0.91); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.season-entry-identity span { overflow: hidden; color: rgba(255,255,255,0.58); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.season-entry-score { color: #d5fff9; font-size: 13px; }
+.season-privacy-note { margin: 13px 0 0; padding: 10px 12px; border-left: 3px solid rgba(255,202,102,0.72); border-radius: 9px; color: rgba(255,255,255,0.68); background: rgba(0,0,0,0.18); font-size: 11px; line-height: 1.45; }
+
 .reference-content { max-width: 950px; }
 .reference-hero {
   display: flex;
@@ -901,14 +941,15 @@ select:focus-visible {
   #office-screen .office-body { width: min(980px, 100%); }
   .office-commandbar { flex-wrap: wrap; gap: 8px; padding: 9px; }
   .office-command-label { flex: 1 1 120px; }
-  .office-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .office-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); }
   .office-tab { min-height: 38px; padding: 8px 4px; }
   .immersive-button { margin-left: auto; font-size: 11px; }
   .accessibility-button { margin-left: 0; font-size: 11px; }
   .office-body[data-active-view] > .office-card { display: none; }
   .office-body[data-active-view="command"] > [data-office-view="command"],
   .office-body[data-active-view="career"] > [data-office-view="career"],
-  .office-body[data-active-view="story"] > [data-office-view="story"] { display: block; }
+  .office-body[data-active-view="story"] > [data-office-view="story"],
+  .office-body[data-active-view="ranking"] > [data-office-view="ranking"] { display: block; }
   .office-card { padding: 14px; }
   .reference-grid { grid-template-columns: 1fr; }
   .reference-card { min-height: 0; }
@@ -916,4 +957,5 @@ select:focus-visible {
   .accessibility-grid { grid-template-columns: 1fr; }
   .accessibility-card { min-height: 0; }
   .accessibility-card-wide { min-height: 0; }
+  .season-board-hero { margin: -14px -14px 14px; padding: 60px 14px 14px; }
 }
