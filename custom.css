@@ -125,6 +125,7 @@ html, body {
 #office-screen .office-header,
 #office-screen .office-body {
   flex: 0 0 auto;
+  width: min(980px, 100%);
 }
 
 .lobby-location {
