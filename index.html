@@ -99,6 +99,7 @@
         <button type="button" class="office-tab is-active" data-office-view-button="command" aria-pressed="true">Central</button>
         <button type="button" class="office-tab" data-office-view-button="career" aria-pressed="false">Carreira</button>
         <button type="button" class="office-tab" data-office-view-button="story" aria-pressed="false">História</button>
+        <button type="button" class="office-tab" data-office-view-button="ranking" aria-pressed="false">Ranking</button>
       </div>
       <button id="immersive-button" type="button" class="immersive-button" aria-pressed="false">Modo imersivo</button>
       <button id="accessibility-button" type="button" class="accessibility-button">Ajustes</button>
@@ -182,6 +183,32 @@
         </div>
         <div id="career-path" class="career-path" aria-label="Jornada de carreira"></div>
         <p id="story-status" class="muted">A Academia abre sua jornada; promoções, confiança da equipe e riscos de rebaixamento entram no próximo capítulo da carreira.</p>
+      </div>
+      <!-- Fase 14: competição local transparente. Nenhum nome, país ou
+           pontuação é transmitido sem uma futura ativação online explícita. -->
+      <div class="office-card season-board" data-office-view="ranking">
+        <div class="season-board-hero">
+          <span class="chapter-kicker">FASE 14 · QUADRO DE HONRA</span>
+          <h3>Ranking da temporada</h3>
+          <p>Supere os marcos de carreira do Hospital Vale e deixe seu nome entre os registros da temporada.</p>
+        </div>
+        <div class="season-player-card">
+          <div>
+            <span class="season-label">SUA POSIÇÃO LOCAL</span>
+            <strong id="season-rank-label">Em preparação</strong>
+            <p id="season-rank-detail">Seu próximo plantão definirá sua primeira marca.</p>
+          </div>
+          <div class="season-score-block">
+            <span>PONTOS</span>
+            <strong id="season-score">0</strong>
+          </div>
+        </div>
+        <label class="season-country-control" for="competition-country">
+          <span>ASSINATURA DA TEMPORADA</span>
+          <select id="competition-country" aria-describedby="competition-privacy-note"></select>
+        </label>
+        <ol id="season-reference-list" class="season-reference-list" aria-label="Marcos locais da temporada"></ol>
+        <p id="competition-privacy-note" class="season-privacy-note">Este é um quadro local: apelido, bandeira e pontuação permanecem neste navegador. O ranking global será ativado no futuro somente com confirmação de envio, moderação de apelidos e validação no servidor.</p>
       </div>
     </div>
   </section>
@@ -346,7 +373,7 @@
   <!-- O overlay de relatório de caso será criado dinamicamente no script. -->
 
   <!-- Carrega o motor local e, em seguida, melhorias de interface sem alterar a engine em runtime. -->
-  <script src="./script.js?v=20261103-f13" defer></script>
-  <script src="./custom.js?v=20261103-f13" defer></script>
+  <script src="./script.js?v=20261103-f14" defer></script>
+  <script src="./custom.js?v=20261103-f14" defer></script>
 </body>
 </html>

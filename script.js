@@ -348,6 +348,64 @@ function applyLearningCaseOutcome({ learning, patient, diagCorrect, missingExams
   return { learning:next, event:{ title: awarded.length ? "Credencial conquistada" : "Rotação atualizada", copy, awarded, cleanClosure } };
 }
 
+// Fase 14: o ranking começa local e explícito. País e apelido nunca são
+// deduzidos pelo jogo, nem enviados a serviço algum. Isso deixa o caminho
+// preparado para uma competição online futura que tenha consentimento,
+// moderação e validação no servidor.
+const COMPETITION_COUNTRIES = [
+  { code:"none", flag:"◇", label:"Sem bandeira" },
+  { code:"BR", flag:"🇧🇷", label:"Brasil" },
+  { code:"PT", flag:"🇵🇹", label:"Portugal" },
+  { code:"AO", flag:"🇦🇴", label:"Angola" },
+  { code:"MZ", flag:"🇲🇿", label:"Moçambique" },
+  { code:"other", flag:"🌎", label:"Outro país" }
+];
+
+const SEASON_REFERENCE_BOARD = [
+  { name:"Dra. Helena Azevedo", flag:"🏥", role:"Legado do Hospital Vale", score:5200 },
+  { name:"Dr. Rafael Torres", flag:"🏥", role:"Marco de coordenação", score:3600 },
+  { name:"Enf. Marina Lopes", flag:"🏥", role:"Marco assistencial", score:2400 },
+  { name:"Dr. Caio Menezes", flag:"🏥", role:"Marco de plantão", score:800 }
+];
+
+function createCompetitionState(){
+  return { country:"none" };
+}
+
+function normalizeCompetitionState(competition){
+  const fallback = createCompetitionState();
+  const country = COMPETITION_COUNTRIES.some(entry => entry.code === competition?.country)
+    ? competition.country
+    : fallback.country;
+  return { country };
+}
+
+function getCompetitionCountry(countryCode){
+  return COMPETITION_COUNTRIES.find(entry => entry.code === countryCode) || COMPETITION_COUNTRIES[0];
+}
+
+function getSeasonSnapshot(profile){
+  const score = Math.max(0, Number(profile?.score) || 0);
+  const country = getCompetitionCountry(normalizeCompetitionState(profile?.competition).country);
+  const player = {
+    name: String(profile?.name || "Seu registro"),
+    flag: country.flag,
+    role: "Seu registro local",
+    score,
+    isPlayer:true
+  };
+  const entries = [...SEASON_REFERENCE_BOARD, player].sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.isPlayer ? -1 : 1;
+  });
+  const position = entries.findIndex(entry => entry.isPlayer) + 1;
+  const nextReference = [...SEASON_REFERENCE_BOARD]
+    .sort((a, b) => a.score - b.score)
+    .find(entry => entry.score > score);
+  const league = [...CAREER_STAGES].reverse().find(stage => score >= stage.floor) || CAREER_STAGES[0];
+  return { country, score, entries, position, league, nextReference };
+}
+
 function applyCareerCaseOutcome({ career, level, totalScore, mode, diagCorrect, missingExams, missingMeds, wrongExams, wrongMeds, outcome }){
   const nextCareer = normalizeCareerState(career, level);
   let nextLevel = clamp(Number(level) || 1, 1, CAREER_STAGES.length);
@@ -634,6 +692,7 @@ class GameEngine {
     if (playerProfile){
       playerProfile.career = normalizeCareerState(playerProfile.career, this.currentLevel);
       playerProfile.learning = normalizeLearningState(playerProfile.learning);
+      playerProfile.competition = normalizeCompetitionState(playerProfile.competition);
       playerProfile.role = getRankTitle(this.currentLevel);
       savePlayerProfile(playerProfile);
       window.playerProfile = playerProfile;
@@ -957,6 +1016,7 @@ class GameEngine {
       playerProfile.stats = this.stats;
       playerProfile.career = career;
       playerProfile.learning = learning;
+      playerProfile.competition = normalizeCompetitionState(playerProfile.competition);
       savePlayerProfile(playerProfile);
       window.playerProfile = playerProfile;
     }
@@ -1036,6 +1096,11 @@ class GameUI {
     this.learningChallenge = document.getElementById("learning-challenge");
     this.learningStreak = document.getElementById("learning-streak");
     this.learningBadges = document.getElementById("learning-badges");
+    this.competitionCountry = document.getElementById("competition-country");
+    this.seasonRankLabel = document.getElementById("season-rank-label");
+    this.seasonRankDetail = document.getElementById("season-rank-detail");
+    this.seasonScore = document.getElementById("season-score");
+    this.seasonReferenceList = document.getElementById("season-reference-list");
 
     this.specialtySelect = document.getElementById("specialty-select");
     this.modeSelect = document.getElementById("mode-select");
@@ -1128,6 +1193,7 @@ class GameUI {
       const savedStats = playerProfile?.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
       const savedCareer = normalizeCareerState(playerProfile?.career, savedLevel);
       const savedLearning = normalizeLearningState(playerProfile?.learning);
+      const savedCompetition = normalizeCompetitionState(playerProfile?.competition);
       engine.currentLevel = savedLevel;
       engine.totalScore = savedScore;
       engine.stats = {
@@ -1144,7 +1210,8 @@ class GameUI {
         score: savedScore,
         stats: engine.stats,
         career: savedCareer,
-        learning: savedLearning
+        learning: savedLearning,
+        competition: savedCompetition
       };
       window.playerProfile = playerProfile;
       savePlayerProfile(playerProfile);
@@ -1222,6 +1289,14 @@ class GameUI {
         this.playInterfaceCue("navigate");
       });
     });
+    this.competitionCountry?.addEventListener("change", () => {
+      if (!playerProfile) return;
+      playerProfile.competition = normalizeCompetitionState({ country:this.competitionCountry.value });
+      savePlayerProfile(playerProfile);
+      window.playerProfile = playerProfile;
+      this.updateOffice(engine);
+      this.playInterfaceCue("confirm");
+    });
     this.immersiveButton?.addEventListener("click", () => this.toggleImmersiveMode());
     document.addEventListener("fullscreenchange", () => this.updateImmersiveButton());
     // O plantão não continua consumindo tempo quando o jogador troca de aba
@@ -1242,7 +1317,7 @@ class GameUI {
   }
 
   setOfficeView(view){
-    const safeView = ["command", "career", "story"].includes(view) ? view : "command";
+    const safeView = ["command", "career", "story", "ranking"].includes(view) ? view : "command";
     if (this.officeBody) this.officeBody.dataset.activeView = safeView;
     this.officeViewButtons.forEach(button => {
       const active = button.dataset.officeViewButton === safeView;
@@ -1413,6 +1488,7 @@ class GameUI {
         ? `Credenciais: ${learningState.badges.join(" · ")}`
         : "Credenciais: em formação";
     }
+    this.renderSeasonBoard(prof);
 
     const stats = prof.stats || engine.stats || { correct:0, incorrect:0, deaths:0 };
     const total = (stats.correct||0) + (stats.incorrect||0);
@@ -1439,6 +1515,55 @@ class GameUI {
       const status = stage.level === safeLevel ? "career-path-current" : stage.level < safeLevel ? "career-path-complete" : "";
       return `<span class="${status}">${stage.title}</span>`;
     }).join("");
+  }
+
+  renderSeasonBoard(profile){
+    if (!this.seasonReferenceList) return;
+    const snapshot = getSeasonSnapshot(profile);
+    if (this.competitionCountry){
+      if (!this.competitionCountry.options.length){
+        COMPETITION_COUNTRIES.forEach((country) => {
+          const option = document.createElement("option");
+          option.value = country.code;
+          option.textContent = `${country.flag} ${country.label}`;
+          this.competitionCountry.appendChild(option);
+        });
+      }
+      this.competitionCountry.value = snapshot.country.code;
+    }
+    if (this.seasonScore) this.seasonScore.textContent = String(snapshot.score);
+    if (this.seasonRankLabel) this.seasonRankLabel.textContent = `${snapshot.position}º lugar · ${snapshot.league.title}`;
+    if (this.seasonRankDetail){
+      this.seasonRankDetail.textContent = snapshot.nextReference
+        ? `Faltam ${snapshot.nextReference.score - snapshot.score} pontos para alcançar ${snapshot.nextReference.name}.`
+        : "Você superou todos os marcos locais da temporada. Proteja seu legado no próximo plantão.";
+    }
+
+    this.seasonReferenceList.innerHTML = "";
+    snapshot.entries.forEach((entry, index) => {
+      const item = document.createElement("li");
+      item.className = "season-reference-entry";
+      if (entry.isPlayer) item.classList.add("is-player");
+
+      const position = document.createElement("span");
+      position.className = "season-entry-position";
+      position.textContent = `#${index + 1}`;
+      const flag = document.createElement("span");
+      flag.className = "season-entry-flag";
+      flag.textContent = entry.flag;
+      const identity = document.createElement("div");
+      identity.className = "season-entry-identity";
+      const name = document.createElement("strong");
+      name.textContent = entry.name;
+      const role = document.createElement("span");
+      role.textContent = entry.role;
+      identity.append(name, role);
+      const points = document.createElement("strong");
+      points.className = "season-entry-score";
+      points.textContent = String(entry.score);
+      item.append(position, flag, identity, points);
+      this.seasonReferenceList.appendChild(item);
+    });
   }
 
   updateLevel(level){
