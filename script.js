@@ -16,6 +16,30 @@ function randomBetweenInt(a,b){ return Math.floor(randomBetween(a, b+1)); }
 function round1(x){ return Math.round(x*10)/10; }
 function normalize(s){ return String(s||"").trim().toLowerCase(); }
 
+// Fase 12: preferências locais de conforto. Elas não alteram casos, arte,
+// pontuação ou carreira e continuam disponíveis quando o jogador retorna.
+const ACCESSIBILITY_STORAGE_KEY = "medsim_accessibility_v1";
+function createAccessibilitySettings(){
+  return { reducedMotion:false, highContrast:false, textScale:"regular", soundEffects:false };
+}
+function normalizeAccessibilitySettings(settings){
+  const fallback = createAccessibilitySettings();
+  return {
+    reducedMotion: Boolean(settings?.reducedMotion),
+    highContrast: Boolean(settings?.highContrast),
+    textScale: settings?.textScale === "large" ? "large" : fallback.textScale,
+    soundEffects: Boolean(settings?.soundEffects)
+  };
+}
+function loadAccessibilitySettings(){
+  try { return normalizeAccessibilitySettings(JSON.parse(localStorage.getItem(ACCESSIBILITY_STORAGE_KEY) || "null")); }
+  catch { return createAccessibilitySettings(); }
+}
+function saveAccessibilitySettings(settings){
+  try { localStorage.setItem(ACCESSIBILITY_STORAGE_KEY, JSON.stringify(normalizeAccessibilitySettings(settings))); }
+  catch {}
+}
+
 function loadPlayerProfile(){
   try { const raw = localStorage.getItem("medsim_playerProfile"); return raw ? JSON.parse(raw) : null; }
   catch { return null; }
@@ -977,6 +1001,7 @@ class GameUI {
     this.officeBody = document.getElementById("office-body");
     this.officeViewButtons = Array.from(document.querySelectorAll("[data-office-view-button]"));
     this.immersiveButton = document.getElementById("immersive-button");
+    this.accessibilityButton = document.getElementById("accessibility-button");
     this.referenceCenterButton = document.getElementById("reference-center-button");
     this.learningMastery = document.getElementById("learning-mastery");
     this.learningChallenge = document.getElementById("learning-challenge");
@@ -1009,9 +1034,18 @@ class GameUI {
     this.diagnosisBack = document.getElementById("diagnosis-back");
     this.referencePage = document.getElementById("reference-page");
     this.referenceBack = document.getElementById("reference-back");
+    this.accessibilityPage = document.getElementById("accessibility-page");
+    this.accessibilityBack = document.getElementById("accessibility-back");
+    this.reducedMotionToggle = document.getElementById("reduced-motion-toggle");
+    this.highContrastToggle = document.getElementById("high-contrast-toggle");
+    this.soundEffectsToggle = document.getElementById("sound-effects-toggle");
+    this.textScaleButtons = Array.from(document.querySelectorAll("[data-text-scale]"));
+    this.accessibilityStatus = document.getElementById("accessibility-status");
 
     this.toastEl = null;
     this.reportOverlay = null;
+    this.accessibilitySettings = loadAccessibilitySettings();
+    this.audioContext = null;
 
     this.selectedAvatarIndex = 0;
 
@@ -1021,6 +1055,8 @@ class GameUI {
   }
 
   init(engine){
+    this.applyAccessibilitySettings();
+
     // Toque na capa -> welcome
     const goWelcome = () => {
       this.coverScreen.classList.remove("active");
@@ -1098,6 +1134,7 @@ class GameUI {
       this.gameScreen.classList.add("active");
 
       engine.start();
+      this.playInterfaceCue("confirm");
     });
 
     this.modeSelect.addEventListener("change", () => this.updateModeExplainer());
@@ -1122,6 +1159,7 @@ class GameUI {
       this.setOfficeView("command");
       this.updateOffice(engine);
       this.officeScreen.classList.add("active");
+      this.playInterfaceCue("success");
       this.toast("Plantão encerrado. Sua trajetória foi mantida.");
     });
 
@@ -1131,9 +1169,28 @@ class GameUI {
     this.diagnosisBack.addEventListener("click", () => this.hideOverlay("diagnosis"));
     this.referenceBack?.addEventListener("click", () => this.hideOverlay("reference"));
     this.referenceCenterButton?.addEventListener("click", () => this.showOverlay("reference"));
+    this.accessibilityBack?.addEventListener("click", () => this.hideOverlay("accessibility"));
+    this.accessibilityButton?.addEventListener("click", () => this.showOverlay("accessibility"));
+
+    this.reducedMotionToggle?.addEventListener("click", () => {
+      this.setAccessibilitySetting("reducedMotion", !this.accessibilitySettings.reducedMotion);
+    });
+    this.highContrastToggle?.addEventListener("click", () => {
+      this.setAccessibilitySetting("highContrast", !this.accessibilitySettings.highContrast);
+    });
+    this.soundEffectsToggle?.addEventListener("click", () => {
+      this.setAccessibilitySetting("soundEffects", !this.accessibilitySettings.soundEffects);
+      this.playInterfaceCue("confirm");
+    });
+    this.textScaleButtons.forEach(button => {
+      button.addEventListener("click", () => this.setAccessibilitySetting("textScale", button.dataset.textScale));
+    });
 
     this.officeViewButtons.forEach(button => {
-      button.addEventListener("click", () => this.setOfficeView(button.dataset.officeViewButton));
+      button.addEventListener("click", () => {
+        this.setOfficeView(button.dataset.officeViewButton);
+        this.playInterfaceCue("navigate");
+      });
     });
     this.immersiveButton?.addEventListener("click", () => this.toggleImmersiveMode());
     document.addEventListener("fullscreenchange", () => this.updateImmersiveButton());
@@ -1170,6 +1227,72 @@ class GameUI {
     }
   }
 
+  setAccessibilitySetting(key, value){
+    this.accessibilitySettings = normalizeAccessibilitySettings({ ...this.accessibilitySettings, [key]:value });
+    saveAccessibilitySettings(this.accessibilitySettings);
+    this.applyAccessibilitySettings();
+  }
+
+  applyAccessibilitySettings(){
+    const settings = normalizeAccessibilitySettings(this.accessibilitySettings);
+    this.accessibilitySettings = settings;
+    const root = document.documentElement;
+    root.dataset.reducedMotion = String(settings.reducedMotion);
+    root.dataset.highContrast = String(settings.highContrast);
+    root.dataset.textScale = settings.textScale;
+
+    const labelToggle = (button, enabled) => {
+      if (!button) return;
+      button.textContent = enabled ? "Ligado" : "Desligado";
+      button.classList.toggle("is-active", enabled);
+      button.setAttribute("aria-pressed", String(enabled));
+    };
+    labelToggle(this.reducedMotionToggle, settings.reducedMotion);
+    labelToggle(this.highContrastToggle, settings.highContrast);
+    labelToggle(this.soundEffectsToggle, settings.soundEffects);
+    this.textScaleButtons.forEach(button => {
+      const active = button.dataset.textScale === settings.textScale;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    if (this.accessibilityStatus){
+      const movement = settings.reducedMotion ? "movimento reduzido" : "movimento padrão";
+      const contrast = settings.highContrast ? "contraste reforçado" : "contraste padrão";
+      const text = settings.textScale === "large" ? "leitura ampliada" : "leitura padrão";
+      const sound = settings.soundEffects ? "sinais sonoros ligados" : "sinais sonoros desligados";
+      this.accessibilityStatus.textContent = `Ajustes ativos: ${movement}, ${contrast}, ${text} e ${sound}.`;
+    }
+  }
+
+  playInterfaceCue(kind = "navigate"){
+    if (!this.accessibilitySettings?.soundEffects || !window.AudioContext) return;
+    try {
+      const context = this.audioContext || new window.AudioContext();
+      this.audioContext = context;
+      if (context.state === "suspended") context.resume();
+      const now = context.currentTime;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const profile = kind === "success"
+        ? { start:520, end:740, duration:0.15 }
+        : kind === "confirm"
+          ? { start:410, end:590, duration:0.13 }
+          : { start:300, end:390, duration:0.09 };
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(profile.start, now);
+      oscillator.frequency.exponentialRampToValueAtTime(profile.end, now + profile.duration);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.04, now + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(now);
+      oscillator.stop(now + profile.duration + 0.02);
+    } catch {
+      // Falha de áudio não pode interromper o plantão nem os recursos visuais.
+    }
+  }
+
   updateModeExplainer(){
     if (!this.modeExplainer) return;
     const isTraining = this.modeSelect?.value === "training";
@@ -1180,6 +1303,7 @@ class GameUI {
 
   setPausedUI(isPaused){
     this.pauseBtn.textContent = isPaused ? "Continuar" : "Pausar";
+    this.playInterfaceCue(isPaused ? "navigate" : "confirm");
     this.toast(isPaused ? "Plantão pausado" : "Plantão retomado");
   }
 
@@ -1578,6 +1702,7 @@ class GameUI {
     if (which === "treatment") this.treatmentPage.classList.remove("hidden");
     if (which === "diagnosis") this.diagnosisPage.classList.remove("hidden");
     if (which === "reference") this.referencePage?.classList.remove("hidden");
+    if (which === "accessibility") this.accessibilityPage?.classList.remove("hidden");
   }
 
   hideOverlay(which){
@@ -1585,6 +1710,7 @@ class GameUI {
     if (which === "treatment") this.treatmentPage.classList.add("hidden");
     if (which === "diagnosis") this.diagnosisPage.classList.add("hidden");
     if (which === "reference") this.referencePage?.classList.add("hidden");
+    if (which === "accessibility") this.accessibilityPage?.classList.add("hidden");
   }
 
   showCaseReport(r){
@@ -1644,12 +1770,16 @@ class GameUI {
     overlay.querySelector("#report-close").addEventListener("click", () => overlay.remove());
     document.body.appendChild(overlay);
     this.reportOverlay = overlay;
+    this.playInterfaceCue(r.diagCorrect ? "success" : "navigate");
   }
 
   toast(msg){
     if (!this.toastEl){
       const t = document.createElement("div");
       t.className = "toast";
+      t.setAttribute("role", "status");
+      t.setAttribute("aria-live", "polite");
+      t.setAttribute("aria-atomic", "true");
       document.body.appendChild(t);
       this.toastEl = t;
     }

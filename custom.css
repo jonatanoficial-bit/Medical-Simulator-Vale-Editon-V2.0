@@ -514,6 +514,7 @@ select:focus-visible {
 .office-tabs { display: flex; gap: 5px; }
 .office-tab,
 .immersive-button,
+.accessibility-button,
 .reference-center-button {
   border: 1px solid rgba(143, 211, 255, 0.23);
   color: rgba(255,255,255,0.88);
@@ -530,6 +531,7 @@ select:focus-visible {
   box-shadow: 0 0 18px rgba(101, 203, 230, 0.18) inset;
 }
 .immersive-button { padding: 8px 10px; border-radius: 11px; white-space: nowrap; }
+.accessibility-button { padding: 8px 10px; border-radius: 11px; white-space: nowrap; }
 .reference-center-button {
   width: 100%;
   display: flex;
@@ -589,6 +591,100 @@ select:focus-visible {
 .reference-card p { margin: 0; color: rgba(255,255,255,0.74); font-size: 12px; line-height: 1.46; }
 .reference-card a { margin-top: auto; padding-top: 13px; color: #bceaff; font-size: 12px; font-weight: 800; }
 .reference-disclaimer { margin: 14px 0 0; padding: 10px 12px; border-left: 3px solid rgba(255, 202, 102, 0.72); border-radius: 9px; background: rgba(0,0,0,0.18); font-size: 11px; }
+
+/* Fase 12: preferências de conforto persistem sem trocar imagens, fundos ou
+   avatares. Os controles têm aparência de console de plantão, não de site. */
+.accessibility-content { max-width: 900px; }
+.accessibility-hero {
+  display: flex;
+  align-items: end;
+  min-height: 142px;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid rgba(143, 211, 255, 0.24);
+  border-radius: 20px;
+  background: linear-gradient(0deg, rgba(2, 13, 22, 0.89), rgba(2, 13, 22, 0.10)), url("images/bg_hospital_01.jpg") center / cover no-repeat;
+}
+.accessibility-hero span { color: #d8f4ff; font-size: 10px; font-weight: 900; letter-spacing: 0.13em; }
+.accessibility-content h2 { margin: 0; }
+.accessibility-lead { margin: 8px 0 16px; color: rgba(255,255,255,0.76); font-size: 13px; line-height: 1.5; }
+.accessibility-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.accessibility-card {
+  min-height: 194px;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  border: 1px solid rgba(143, 211, 255, 0.20);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(8, 27, 40, 0.76), rgba(3, 13, 23, 0.70));
+}
+.accessibility-card > span { color: #9bdcff; font-size: 9px; font-weight: 900; letter-spacing: 0.10em; }
+.accessibility-card h3 { margin: 10px 0 7px; font-size: 16px; }
+.accessibility-card p { margin: 0; color: rgba(255,255,255,0.72); font-size: 12px; line-height: 1.46; }
+.accessibility-card-wide { min-height: 178px; }
+.setting-toggle,
+.text-scale-button {
+  border: 1px solid rgba(143, 211, 255, 0.24);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.86);
+  background: rgba(2, 12, 21, 0.42);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.setting-toggle { width: 100%; margin-top: auto; padding: 10px; }
+.setting-toggle.is-active,
+.text-scale-button.is-active { border-color: rgba(134, 224, 213, 0.62); background: rgba(37, 139, 128, 0.28); color: #e2fff9; }
+.text-scale-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+.text-scale-button { padding: 10px; }
+.accessibility-status { margin: 14px 0 0; padding: 10px 12px; border-left: 3px solid rgba(134, 224, 213, 0.70); border-radius: 9px; color: rgba(255,255,255,0.72); background: rgba(0,0,0,0.18); font-size: 11px; line-height: 1.45; }
+
+:root[data-reduced-motion="true"] *,
+:root[data-reduced-motion="true"] *::before,
+:root[data-reduced-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+:root[data-high-contrast="true"] .office-card,
+:root[data-high-contrast="true"] .patients-panel,
+:root[data-high-contrast="true"] .patient-panel,
+:root[data-high-contrast="true"] .overlay-content,
+:root[data-high-contrast="true"] .office-commandbar {
+  border-color: rgba(202, 242, 255, 0.78);
+  background-color: rgba(2, 11, 19, 0.94);
+}
+:root[data-high-contrast="true"] .muted,
+:root[data-high-contrast="true"] .office-level,
+:root[data-high-contrast="true"] .patient-complaint,
+:root[data-high-contrast="true"] .accessibility-card p { color: rgba(255,255,255,0.88); }
+:root[data-high-contrast="true"] .location-marker,
+:root[data-high-contrast="true"] .turn-guide,
+:root[data-high-contrast="true"] .shift-challenge { border-color: rgba(193, 239, 255, 0.70); }
+
+:root[data-text-scale="large"] .office-card,
+:root[data-text-scale="large"] .patient-panel,
+:root[data-text-scale="large"] .patients-panel,
+:root[data-text-scale="large"] .overlay-content { font-size: 1.12em; }
+:root[data-text-scale="large"] .office-card p,
+:root[data-text-scale="large"] .patient-panel p,
+:root[data-text-scale="large"] .overlay-content p,
+:root[data-text-scale="large"] .action-btn,
+:root[data-text-scale="large"] .office-tab,
+:root[data-text-scale="large"] .setting-toggle,
+:root[data-text-scale="large"] .text-scale-button { font-size: 1em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
 
 /* Fase 7: a Academia usa as imagens já existentes como ambientação. Nenhum
    arquivo de arte é substituído, recortado ou regravado. */
@@ -808,6 +904,7 @@ select:focus-visible {
   .office-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
   .office-tab { min-height: 38px; padding: 8px 4px; }
   .immersive-button { margin-left: auto; font-size: 11px; }
+  .accessibility-button { margin-left: 0; font-size: 11px; }
   .office-body[data-active-view] > .office-card { display: none; }
   .office-body[data-active-view="command"] > [data-office-view="command"],
   .office-body[data-active-view="career"] > [data-office-view="career"],
@@ -816,4 +913,7 @@ select:focus-visible {
   .reference-grid { grid-template-columns: 1fr; }
   .reference-card { min-height: 0; }
   .reference-card a { margin-top: 12px; }
+  .accessibility-grid { grid-template-columns: 1fr; }
+  .accessibility-card { min-height: 0; }
+  .accessibility-card-wide { min-height: 0; }
 }
